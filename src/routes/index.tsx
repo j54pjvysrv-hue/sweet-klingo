@@ -57,16 +57,16 @@ function HomePage() {
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link
-                to="/read"
+                to="/auth"
                 className="inline-flex items-center gap-2 rounded-full bg-gradient-blossom px-6 py-3 text-base font-semibold text-primary-foreground shadow-soft transition-transform hover:scale-[1.03]"
               >
-                Try a Candy lesson <ArrowRight className="h-4 w-4" />
+                Start free <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                to="/chat"
+                to="/read"
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-base font-semibold text-foreground hover:border-primary hover:text-primary"
               >
-                Chat with Sana
+                Try a Candy demo
               </Link>
             </div>
             <p className="mt-4 text-xs text-muted-foreground">No streak shame · Ad-free · Built for immersion</p>
