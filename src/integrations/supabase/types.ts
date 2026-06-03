@@ -14,16 +14,378 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      candy_passages: {
+        Row: {
+          body: Json
+          category: string
+          created_at: string
+          emoji: string | null
+          english_hint: string | null
+          generated_by: string | null
+          id: string
+          level: Database["public"]["Enums"]["learning_level"]
+          reading_minutes: number | null
+          slug: string | null
+          title: string
+          topic: string
+        }
+        Insert: {
+          body: Json
+          category: string
+          created_at?: string
+          emoji?: string | null
+          english_hint?: string | null
+          generated_by?: string | null
+          id?: string
+          level: Database["public"]["Enums"]["learning_level"]
+          reading_minutes?: number | null
+          slug?: string | null
+          title: string
+          topic: string
+        }
+        Update: {
+          body?: Json
+          category?: string
+          created_at?: string
+          emoji?: string | null
+          english_hint?: string | null
+          generated_by?: string | null
+          id?: string
+          level?: Database["public"]["Enums"]["learning_level"]
+          reading_minutes?: number | null
+          slug?: string | null
+          title?: string
+          topic?: string
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          parts: Json
+          role: string
+          thread_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          parts: Json
+          role: string
+          thread_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          parts?: Json
+          role?: string
+          thread_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "chat_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_threads: {
+        Row: {
+          context: Json | null
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      courses: {
+        Row: {
+          created_at: string
+          description: string | null
+          emoji: string | null
+          id: string
+          level: Database["public"]["Enums"]["learning_level"]
+          slug: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          emoji?: string | null
+          id?: string
+          level: Database["public"]["Enums"]["learning_level"]
+          slug: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          emoji?: string | null
+          id?: string
+          level?: Database["public"]["Enums"]["learning_level"]
+          slug?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      lessons: {
+        Row: {
+          course_id: string
+          created_at: string
+          grammar_focus: string | null
+          id: string
+          passage_id: string | null
+          sort_order: number
+          summary: string | null
+          title: string
+          vocab_count: number | null
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          grammar_focus?: string | null
+          id?: string
+          passage_id?: string | null
+          sort_order?: number
+          summary?: string | null
+          title: string
+          vocab_count?: number | null
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          grammar_focus?: string | null
+          id?: string
+          passage_id?: string | null
+          sort_order?: number
+          summary?: string | null
+          title?: string
+          vocab_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_passage_id_fkey"
+            columns: ["passage_id"]
+            isOneToOne: false
+            referencedRelation: "candy_passages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          passage_id: string | null
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          passage_id?: string | null
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          passage_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_passage_id_fkey"
+            columns: ["passage_id"]
+            isOneToOne: false
+            referencedRelation: "candy_passages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          daily_goal_min: number
+          display_name: string | null
+          id: string
+          last_active_date: string | null
+          level: Database["public"]["Enums"]["learning_level"]
+          onboarded: boolean
+          streak_days: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          daily_goal_min?: number
+          display_name?: string | null
+          id: string
+          last_active_date?: string | null
+          level?: Database["public"]["Enums"]["learning_level"]
+          onboarded?: boolean
+          streak_days?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          daily_goal_min?: number
+          display_name?: string | null
+          id?: string
+          last_active_date?: string | null
+          level?: Database["public"]["Enums"]["learning_level"]
+          onboarded?: boolean
+          streak_days?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_progress: {
+        Row: {
+          completed_at: string | null
+          id: string
+          lesson_id: string
+          minutes_spent: number | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          lesson_id: string
+          minutes_spent?: number | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          lesson_id?: string
+          minutes_spent?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vocab_saved: {
+        Row: {
+          created_at: string
+          grammar: string | null
+          id: string
+          korean: string
+          meaning: string
+          note: string | null
+          pos: string | null
+          romanization: string | null
+          source_passage_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          grammar?: string | null
+          id?: string
+          korean: string
+          meaning: string
+          note?: string | null
+          pos?: string | null
+          romanization?: string | null
+          source_passage_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          grammar?: string | null
+          id?: string
+          korean?: string
+          meaning?: string
+          note?: string | null
+          pos?: string | null
+          romanization?: string | null
+          source_passage_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vocab_saved_source_passage_id_fkey"
+            columns: ["source_passage_id"]
+            isOneToOne: false
+            referencedRelation: "candy_passages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
+      learning_level: "L1" | "L2" | "L3" | "L4" | "L5"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +512,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+      learning_level: ["L1", "L2", "L3", "L4", "L5"],
+    },
   },
 } as const
