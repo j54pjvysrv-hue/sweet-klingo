@@ -111,7 +111,7 @@ function CoursesPage() {
                     <Link
                       key={l.id}
                       to="/read"
-                      search={(prev) => ({ ...prev, passage: l.passage_id ?? undefined })}
+                      search={{ passage: l.passage_id ?? undefined } as never}
                       className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-background px-4 py-3 text-sm transition-colors hover:border-primary"
                     >
                       <span className="font-medium text-foreground">{l.sort_order}. {l.title}</span>

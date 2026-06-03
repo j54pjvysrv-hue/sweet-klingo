@@ -103,7 +103,7 @@ function LevelPage() {
               <Link
                 key={l.id}
                 to="/read"
-                search={(prev) => ({ ...prev, passage: l.passage_id ?? undefined, lesson: l.id })}
+                search={{ passage: l.passage_id ?? undefined, lesson: l.id } as never}
                 className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-petal"
               >
                 <span
