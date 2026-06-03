@@ -13,8 +13,13 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ReadRouteImport } from './routes/read'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as ChatRouteImport } from './routes/chat'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedCoursesRouteImport } from './routes/_authenticated/courses'
+import { Route as AuthenticatedCoursesLevelIdRouteImport } from './routes/_authenticated/courses.$levelId'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -36,6 +41,15 @@ const ChatRoute = ChatRouteImport.update({
   path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -46,49 +60,105 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCoursesRoute = AuthenticatedCoursesRouteImport.update({
+  id: '/courses',
+  path: '/courses',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCoursesLevelIdRoute =
+  AuthenticatedCoursesLevelIdRouteImport.update({
+    id: '/$levelId',
+    path: '/$levelId',
+    getParentRoute: () => AuthenticatedCoursesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/library': typeof LibraryRoute
   '/read': typeof ReadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/courses': typeof AuthenticatedCoursesRouteWithChildren
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/api/chat': typeof ApiChatRoute
+  '/courses/$levelId': typeof AuthenticatedCoursesLevelIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/library': typeof LibraryRoute
   '/read': typeof ReadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/courses': typeof AuthenticatedCoursesRouteWithChildren
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/api/chat': typeof ApiChatRoute
+  '/courses/$levelId': typeof AuthenticatedCoursesLevelIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/library': typeof LibraryRoute
   '/read': typeof ReadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/_authenticated/courses': typeof AuthenticatedCoursesRouteWithChildren
+  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/api/chat': typeof ApiChatRoute
+  '/_authenticated/courses/$levelId': typeof AuthenticatedCoursesLevelIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/chat' | '/library' | '/read' | '/sitemap.xml' | '/api/chat'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/chat' | '/library' | '/read' | '/sitemap.xml' | '/api/chat'
-  id:
-    | '__root__'
+  fullPaths:
     | '/'
+    | '/auth'
     | '/chat'
     | '/library'
     | '/read'
     | '/sitemap.xml'
+    | '/courses'
+    | '/onboarding'
     | '/api/chat'
+    | '/courses/$levelId'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/auth'
+    | '/chat'
+    | '/library'
+    | '/read'
+    | '/sitemap.xml'
+    | '/courses'
+    | '/onboarding'
+    | '/api/chat'
+    | '/courses/$levelId'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/chat'
+    | '/library'
+    | '/read'
+    | '/sitemap.xml'
+    | '/_authenticated/courses'
+    | '/_authenticated/onboarding'
+    | '/api/chat'
+    | '/_authenticated/courses/$levelId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   ChatRoute: typeof ChatRoute
   LibraryRoute: typeof LibraryRoute
   ReadRoute: typeof ReadRoute
@@ -126,6 +196,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -140,11 +224,58 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/courses': {
+      id: '/_authenticated/courses'
+      path: '/courses'
+      fullPath: '/courses'
+      preLoaderRoute: typeof AuthenticatedCoursesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/courses/$levelId': {
+      id: '/_authenticated/courses/$levelId'
+      path: '/$levelId'
+      fullPath: '/courses/$levelId'
+      preLoaderRoute: typeof AuthenticatedCoursesLevelIdRouteImport
+      parentRoute: typeof AuthenticatedCoursesRoute
+    }
   }
 }
 
+interface AuthenticatedCoursesRouteChildren {
+  AuthenticatedCoursesLevelIdRoute: typeof AuthenticatedCoursesLevelIdRoute
+}
+
+const AuthenticatedCoursesRouteChildren: AuthenticatedCoursesRouteChildren = {
+  AuthenticatedCoursesLevelIdRoute: AuthenticatedCoursesLevelIdRoute,
+}
+
+const AuthenticatedCoursesRouteWithChildren =
+  AuthenticatedCoursesRoute._addFileChildren(AuthenticatedCoursesRouteChildren)
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCoursesRoute: typeof AuthenticatedCoursesRouteWithChildren
+  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCoursesRoute: AuthenticatedCoursesRouteWithChildren,
+  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   ChatRoute: ChatRoute,
   LibraryRoute: LibraryRoute,
   ReadRoute: ReadRoute,
@@ -154,3 +285,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
