@@ -80,14 +80,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Sweet — Learn Korean through stories, not flashcards" },
+      { title: "Sweet — Korean Learning Assistant" },
       { name: "description", content: "Sweet is an AI-powered Korean learning app. Read real Korean, tap any word for instant grammar help, and chat with Sana — your AI Korean tutor." },
       { name: "author", content: "Sweet" },
-      { property: "og:title", content: "Sweet — Learn Korean through stories, not flashcards" },
-      { property: "og:description", content: "Read real Korean, tap any word for instant grammar help, and chat with Sana — your AI Korean tutor." },
+      { property: "og:title", content: "Sweet — Korean Learning Assistant" },
+      { property: "og:description", content: "Sweet is an AI-powered Korean learning app. Read real Korean, tap any word for instant grammar help, and chat with Sana — your AI Korean tutor." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Sweet — Korean Learning Assistant" },
+      { name: "twitter:description", content: "Sweet is an AI-powered Korean learning app. Read real Korean, tap any word for instant grammar help, and chat with Sana — your AI Korean tutor." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/d4917749-4015-4ccd-b583-3af11113f929" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/d4917749-4015-4ccd-b583-3af11113f929" },
     ],
     links: [
       {
