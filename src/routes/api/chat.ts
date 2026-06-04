@@ -73,7 +73,7 @@ export const Route = createFileRoute("/api/chat")({
                     thread_id: threadId,
                     user_id: userId,
                     role: m.role,
-                    parts: m.parts as unknown as object,
+                    parts: m.parts as unknown as never,
                   });
                 }
                 await supabaseAdmin
