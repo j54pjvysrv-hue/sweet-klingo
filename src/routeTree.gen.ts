@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ReadRouteImport } from './routes/read'
 import { Route as LibraryRouteImport } from './routes/library'
+import { Route as HanjaRouteImport } from './routes/hanja'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -36,6 +37,11 @@ const ReadRoute = ReadRouteImport.update({
 const LibraryRoute = LibraryRouteImport.update({
   id: '/library',
   path: '/library',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HanjaRoute = HanjaRouteImport.update({
+  id: '/hanja',
+  path: '/hanja',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChatRoute = ChatRouteImport.update({
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRouteWithChildren
+  '/hanja': typeof HanjaRoute
   '/library': typeof LibraryRoute
   '/read': typeof ReadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRouteWithChildren
+  '/hanja': typeof HanjaRoute
   '/library': typeof LibraryRoute
   '/read': typeof ReadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRouteWithChildren
+  '/hanja': typeof HanjaRoute
   '/library': typeof LibraryRoute
   '/read': typeof ReadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/chat'
+    | '/hanja'
     | '/library'
     | '/read'
     | '/sitemap.xml'
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/chat'
+    | '/hanja'
     | '/library'
     | '/read'
     | '/sitemap.xml'
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/chat'
+    | '/hanja'
     | '/library'
     | '/read'
     | '/sitemap.xml'
@@ -184,6 +196,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ChatRoute: typeof ChatRouteWithChildren
+  HanjaRoute: typeof HanjaRoute
   LibraryRoute: typeof LibraryRoute
   ReadRoute: typeof ReadRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -212,6 +225,13 @@ declare module '@tanstack/react-router' {
       path: '/library'
       fullPath: '/library'
       preLoaderRoute: typeof LibraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hanja': {
+      id: '/hanja'
+      path: '/hanja'
+      fullPath: '/hanja'
+      preLoaderRoute: typeof HanjaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chat': {
@@ -326,6 +346,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ChatRoute: ChatRouteWithChildren,
+  HanjaRoute: HanjaRoute,
   LibraryRoute: LibraryRoute,
   ReadRoute: ReadRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
