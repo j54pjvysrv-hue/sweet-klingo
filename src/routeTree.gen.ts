@@ -21,6 +21,7 @@ import { Route as ChatThreadIdRouteImport } from './routes/chat.$threadId'
 import { Route as ApiGenerateCandyRouteImport } from './routes/api/generate-candy'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedCoursesRouteImport } from './routes/_authenticated/courses'
 import { Route as AuthenticatedCoursesLevelIdRouteImport } from './routes/_authenticated/courses.$levelId'
 
@@ -83,6 +84,11 @@ const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCoursesRoute = AuthenticatedCoursesRouteImport.update({
   id: '/courses',
   path: '/courses',
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/read': typeof ReadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/courses': typeof AuthenticatedCoursesRouteWithChildren
+  '/home': typeof AuthenticatedHomeRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/api/chat': typeof ApiChatRoute
   '/api/generate-candy': typeof ApiGenerateCandyRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/read': typeof ReadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/courses': typeof AuthenticatedCoursesRouteWithChildren
+  '/home': typeof AuthenticatedHomeRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/api/chat': typeof ApiChatRoute
   '/api/generate-candy': typeof ApiGenerateCandyRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/read': typeof ReadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/courses': typeof AuthenticatedCoursesRouteWithChildren
+  '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/api/chat': typeof ApiChatRoute
   '/api/generate-candy': typeof ApiGenerateCandyRoute
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
     | '/read'
     | '/sitemap.xml'
     | '/courses'
+    | '/home'
     | '/onboarding'
     | '/api/chat'
     | '/api/generate-candy'
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/read'
     | '/sitemap.xml'
     | '/courses'
+    | '/home'
     | '/onboarding'
     | '/api/chat'
     | '/api/generate-candy'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/read'
     | '/sitemap.xml'
     | '/_authenticated/courses'
+    | '/_authenticated/home'
     | '/_authenticated/onboarding'
     | '/api/chat'
     | '/api/generate-candy'
@@ -290,6 +302,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/home': {
+      id: '/_authenticated/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AuthenticatedHomeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/courses': {
       id: '/_authenticated/courses'
       path: '/courses'
@@ -320,11 +339,13 @@ const AuthenticatedCoursesRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCoursesRoute: typeof AuthenticatedCoursesRouteWithChildren
+  AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCoursesRoute: AuthenticatedCoursesRouteWithChildren,
+  AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
 }
 
@@ -356,3 +377,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
