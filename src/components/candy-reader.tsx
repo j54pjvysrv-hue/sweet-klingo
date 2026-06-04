@@ -246,15 +246,32 @@ export function CandyReader({ passage }: { passage: Passage }) {
                   </div>
                 )}
                 {token.info.grammar && (
-                  <div>
-                    <span className="font-semibold text-foreground">Grammar · </span>
-                    <span className="text-muted-foreground">{token.info.grammar}</span>
+                  <div className="rounded-lg bg-secondary/40 p-3">
+                    <div className="text-xs font-semibold uppercase tracking-wider text-primary">Grammar</div>
+                    <Markdown className="prose-p:my-1 text-sm">{token.info.grammar}</Markdown>
                   </div>
                 )}
                 {token.info.note && (
                   <div className="rounded-lg bg-secondary/60 p-3 text-muted-foreground">
-                    <span className="font-semibold text-primary">Sana’s note · </span>
+                    <span className="font-semibold text-primary">Sana's note · </span>
                     {token.info.note}
+                  </div>
+                )}
+                {hanja.length > 0 && (
+                  <div className="rounded-lg border border-border bg-card p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-primary">Hanja roots</span>
+                      <Link to="/hanja" className="text-[11px] font-medium text-primary hover:underline">Open lookup →</Link>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {hanja.map((h) => (
+                        <div key={h.character} className="flex items-center gap-2 rounded-full bg-secondary px-2.5 py-1">
+                          <span className="font-korean text-lg text-primary">{h.character}</span>
+                          <span className="font-korean text-xs text-foreground">{h.korean_reading}</span>
+                          <span className="text-[11px] text-muted-foreground">{h.meaning}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
