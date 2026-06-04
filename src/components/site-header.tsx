@@ -3,13 +3,16 @@ import { Sparkles, LogOut } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { GlobalSearch } from "@/components/global-search";
 
 const nav = [
   { to: "/", label: "Home" },
   { to: "/library", label: "Library" },
   { to: "/read", label: "Candy" },
+  { to: "/hanja", label: "Hanja" },
   { to: "/chat", label: "Sana" },
   { to: "/courses", label: "Courses" },
+  { to: "/home", label: "Progress" },
 ] as const;
 
 export function SiteHeader() {
@@ -45,6 +48,7 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
+          <GlobalSearch />
           {!loading && user ? (
             <>
               <Link

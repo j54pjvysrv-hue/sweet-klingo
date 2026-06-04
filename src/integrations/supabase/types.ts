@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          code: string
+          description: string | null
+          earned_at: string
+          emoji: string | null
+          id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          description?: string | null
+          earned_at?: string
+          emoji?: string | null
+          id?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          description?: string | null
+          earned_at?: string
+          emoji?: string | null
+          id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       candy_passages: {
         Row: {
           body: Json
@@ -154,6 +184,69 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_progress: {
+        Row: {
+          created_at: string
+          day: string
+          id: string
+          lessons_done: number
+          minutes: number
+          user_id: string
+          words_saved: number
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          id?: string
+          lessons_done?: number
+          minutes?: number
+          user_id: string
+          words_saved?: number
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          id?: string
+          lessons_done?: number
+          minutes?: number
+          user_id?: string
+          words_saved?: number
+        }
+        Relationships: []
+      }
+      hanja: {
+        Row: {
+          character: string
+          created_at: string
+          examples: Json
+          id: string
+          korean_reading: string
+          meaning: string
+          notes: string | null
+          romanization: string | null
+        }
+        Insert: {
+          character: string
+          created_at?: string
+          examples?: Json
+          id?: string
+          korean_reading: string
+          meaning: string
+          notes?: string | null
+          romanization?: string | null
+        }
+        Update: {
+          character?: string
+          created_at?: string
+          examples?: Json
+          id?: string
+          korean_reading?: string
+          meaning?: string
+          notes?: string | null
+          romanization?: string | null
+        }
+        Relationships: []
+      }
       lessons: {
         Row: {
           course_id: string
@@ -270,6 +363,36 @@ export type Database = {
           onboarded?: boolean
           streak_days?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      quiz_results: {
+        Row: {
+          answers: Json | null
+          created_at: string
+          id: string
+          score: number
+          suggested_level: Database["public"]["Enums"]["learning_level"]
+          total: number
+          user_id: string
+        }
+        Insert: {
+          answers?: Json | null
+          created_at?: string
+          id?: string
+          score: number
+          suggested_level: Database["public"]["Enums"]["learning_level"]
+          total: number
+          user_id: string
+        }
+        Update: {
+          answers?: Json | null
+          created_at?: string
+          id?: string
+          score?: number
+          suggested_level?: Database["public"]["Enums"]["learning_level"]
+          total?: number
+          user_id?: string
         }
         Relationships: []
       }

@@ -1,16 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Sparkles } from "lucide-react";
+import { Search, Sparkles, Loader2 } from "lucide-react";
 import { CATEGORY_LABELS, LEVELS } from "@/lib/levels";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/library")({
   head: () => ({
     meta: [
       { title: "Candy Library — Sweet" },
       { name: "description", content: "Browse Korean Candy by topic and level. Generate custom stories with AI." },
-      { property: "og:title", content: "Candy Library — Sweet" },
-      { property: "og:description", content: "Browse Korean Candy by topic and level. Generate custom stories with AI." },
     ],
   }),
   component: LibraryPage,
@@ -31,21 +30,29 @@ type Passage = {
 const CATEGORIES = ["all", "daily_life", "student_life", "kdrama", "career", "topik", "culture"] as const;
 
 function LibraryPage() {
+  const navigate = useNavigate();
   const [cat, setCat] = useState<(typeof CATEGORIES)[number]>("all");
   const [level, setLevel] = useState<"all" | "L1" | "L2" | "L3" | "L4" | "L5">("all");
   const [q, setQ] = useState("");
   const [passages, setPassages] = useState<Passage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [genPrompt, setGenPrompt] = useState("");
+  const [genLevel, setGenLevel] = useState<"L1" | "L2" | "L3" | "L4" | "L5">("L2");
+  const [generating, setGenerating] = useState(false);
 
-  useEffect(() => {
-    supabase
+  async function refresh() {
+    const { data } = await supabase
       .from("candy_passages")
       .select("id, slug, title, level, topic, category, emoji, english_hint, reading_minutes")
-      .order("level")
-      .then(({ data }) => {
-        setPassages(data ?? []);
-        setLoading(false);
-      });
+      .order("level");
+    setPassages(data ?? []);
+  }
+
+  useEffect(() => {
+    refresh().finally(() => setLoading(false));
+    supabase.from("profiles").select("level").maybeSingle().then(({ data }) => {
+      if (data?.level) setGenLevel(data.level as typeof genLevel);
+    });
   }, []);
 
   const items = useMemo(
@@ -59,6 +66,35 @@ function LibraryPage() {
       }),
     [passages, cat, level, q],
   );
+
+  async function generateCandy() {
+    const prompt = genPrompt.trim();
+    if (!prompt) {
+      toast.info("Describe what you'd like to read about.");
+      return;
+    }
+    setGenerating(true);
+    try {
+      const res = await fetch("/api/generate-candy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, level: genLevel }),
+      });
+      const data = (await res.json()) as { id?: string; error?: string };
+      if (!res.ok || !data.id) {
+        toast.error(data.error || "Generation failed. Try a simpler prompt.");
+        setGenerating(false);
+        return;
+      }
+      toast.success("Your Candy is ready 🍬");
+      navigate({ to: "/read", search: { passage: data.id } as never });
+    } catch (e) {
+      console.error(e);
+      toast.error(e instanceof Error ? e.message : "Network error");
+    } finally {
+      setGenerating(false);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-12 sm:py-16">
@@ -75,19 +111,36 @@ function LibraryPage() {
         </p>
       </div>
 
-      {/* Generate prompt placeholder */}
+      {/* Generate */}
       <div className="mt-8 rounded-2xl border border-border bg-card p-5 shadow-petal">
         <label className="text-xs font-semibold uppercase tracking-wider text-primary">Generate a custom Candy</label>
         <div className="mt-2 flex flex-col gap-2 sm:flex-row">
           <input
-            placeholder="e.g. Intermediate K-drama scene at a Han River picnic, focus on -다고 했어요"
-            className="flex-1 rounded-full border border-border bg-background px-5 py-3 text-sm outline-none placeholder:text-muted-foreground/70 focus:border-primary focus:ring-2 focus:ring-[color:var(--blossom-soft)]"
+            value={genPrompt}
+            onChange={(e) => setGenPrompt(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !generating) generateCandy(); }}
+            disabled={generating}
+            placeholder="e.g. K-drama scene at a Han River picnic, focus on -다고 했어요"
+            className="flex-1 rounded-full border border-border bg-background px-5 py-3 text-sm outline-none placeholder:text-muted-foreground/70 focus:border-primary focus:ring-2 focus:ring-[color:var(--blossom-soft)] disabled:opacity-60"
           />
-          <button className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-blossom px-5 py-3 text-sm font-semibold text-primary-foreground shadow-petal hover:scale-[1.02]">
-            <Sparkles className="h-4 w-4" /> Generate
+          <select
+            value={genLevel}
+            onChange={(e) => setGenLevel(e.target.value as typeof genLevel)}
+            disabled={generating}
+            className="rounded-full border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary"
+          >
+            {(["L1","L2","L3","L4","L5"] as const).map((l) => <option key={l} value={l}>{l}</option>)}
+          </select>
+          <button
+            onClick={generateCandy}
+            disabled={generating || !genPrompt.trim()}
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-blossom px-5 py-3 text-sm font-semibold text-primary-foreground shadow-petal hover:scale-[1.02] disabled:opacity-60"
+          >
+            {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {generating ? "Generating…" : "Generate"}
           </button>
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">Hooks into Lovable AI generation in the next iteration.</p>
+        <p className="mt-2 text-xs text-muted-foreground">Takes ~10–20 seconds. Your Candy is saved to your library.</p>
       </div>
 
       {/* Filters */}

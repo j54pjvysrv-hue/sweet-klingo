@@ -123,6 +123,12 @@ function OnboardingPage() {
           >
             {busy ? "Saving…" : "Start my first chapter"}
           </button>
+          <button
+            onClick={() => navigate({ to: "/quiz" })}
+            className="rounded-full border border-border bg-card px-6 py-2 text-sm font-semibold text-foreground hover:border-primary hover:text-primary"
+          >
+            Not sure? Take the 60-second placement quiz →
+          </button>
           <p className="text-xs text-muted-foreground">You can switch levels anytime from your profile.</p>
         </div>
       </div>

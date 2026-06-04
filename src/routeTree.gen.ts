@@ -12,12 +12,17 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ReadRouteImport } from './routes/read'
 import { Route as LibraryRouteImport } from './routes/library'
+import { Route as HanjaRouteImport } from './routes/hanja'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ChatThreadIdRouteImport } from './routes/chat.$threadId'
+import { Route as ApiGenerateCandyRouteImport } from './routes/api/generate-candy'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AuthenticatedQuizRouteImport } from './routes/_authenticated/quiz'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedCoursesRouteImport } from './routes/_authenticated/courses'
 import { Route as AuthenticatedCoursesLevelIdRouteImport } from './routes/_authenticated/courses.$levelId'
 
@@ -34,6 +39,11 @@ const ReadRoute = ReadRouteImport.update({
 const LibraryRoute = LibraryRouteImport.update({
   id: '/library',
   path: '/library',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HanjaRoute = HanjaRouteImport.update({
+  id: '/hanja',
+  path: '/hanja',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChatRoute = ChatRouteImport.update({
@@ -55,14 +65,34 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatThreadIdRoute = ChatThreadIdRouteImport.update({
+  id: '/$threadId',
+  path: '/$threadId',
+  getParentRoute: () => ChatRoute,
+} as any)
+const ApiGenerateCandyRoute = ApiGenerateCandyRouteImport.update({
+  id: '/api/generate-candy',
+  path: '/api/generate-candy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedQuizRoute = AuthenticatedQuizRouteImport.update({
+  id: '/quiz',
+  path: '/quiz',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCoursesRoute = AuthenticatedCoursesRouteImport.update({
@@ -80,25 +110,35 @@ const AuthenticatedCoursesLevelIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/chat': typeof ChatRoute
+  '/chat': typeof ChatRouteWithChildren
+  '/hanja': typeof HanjaRoute
   '/library': typeof LibraryRoute
   '/read': typeof ReadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/courses': typeof AuthenticatedCoursesRouteWithChildren
+  '/home': typeof AuthenticatedHomeRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/quiz': typeof AuthenticatedQuizRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/generate-candy': typeof ApiGenerateCandyRoute
+  '/chat/$threadId': typeof ChatThreadIdRoute
   '/courses/$levelId': typeof AuthenticatedCoursesLevelIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/chat': typeof ChatRoute
+  '/chat': typeof ChatRouteWithChildren
+  '/hanja': typeof HanjaRoute
   '/library': typeof LibraryRoute
   '/read': typeof ReadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/courses': typeof AuthenticatedCoursesRouteWithChildren
+  '/home': typeof AuthenticatedHomeRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/quiz': typeof AuthenticatedQuizRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/generate-candy': typeof ApiGenerateCandyRoute
+  '/chat/$threadId': typeof ChatThreadIdRoute
   '/courses/$levelId': typeof AuthenticatedCoursesLevelIdRoute
 }
 export interface FileRoutesById {
@@ -106,13 +146,18 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/chat': typeof ChatRoute
+  '/chat': typeof ChatRouteWithChildren
+  '/hanja': typeof HanjaRoute
   '/library': typeof LibraryRoute
   '/read': typeof ReadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/courses': typeof AuthenticatedCoursesRouteWithChildren
+  '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/quiz': typeof AuthenticatedQuizRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/generate-candy': typeof ApiGenerateCandyRoute
+  '/chat/$threadId': typeof ChatThreadIdRoute
   '/_authenticated/courses/$levelId': typeof AuthenticatedCoursesLevelIdRoute
 }
 export interface FileRouteTypes {
@@ -121,24 +166,34 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/chat'
+    | '/hanja'
     | '/library'
     | '/read'
     | '/sitemap.xml'
     | '/courses'
+    | '/home'
     | '/onboarding'
+    | '/quiz'
     | '/api/chat'
+    | '/api/generate-candy'
+    | '/chat/$threadId'
     | '/courses/$levelId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/chat'
+    | '/hanja'
     | '/library'
     | '/read'
     | '/sitemap.xml'
     | '/courses'
+    | '/home'
     | '/onboarding'
+    | '/quiz'
     | '/api/chat'
+    | '/api/generate-candy'
+    | '/chat/$threadId'
     | '/courses/$levelId'
   id:
     | '__root__'
@@ -146,12 +201,17 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/chat'
+    | '/hanja'
     | '/library'
     | '/read'
     | '/sitemap.xml'
     | '/_authenticated/courses'
+    | '/_authenticated/home'
     | '/_authenticated/onboarding'
+    | '/_authenticated/quiz'
     | '/api/chat'
+    | '/api/generate-candy'
+    | '/chat/$threadId'
     | '/_authenticated/courses/$levelId'
   fileRoutesById: FileRoutesById
 }
@@ -159,11 +219,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  ChatRoute: typeof ChatRoute
+  ChatRoute: typeof ChatRouteWithChildren
+  HanjaRoute: typeof HanjaRoute
   LibraryRoute: typeof LibraryRoute
   ReadRoute: typeof ReadRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiGenerateCandyRoute: typeof ApiGenerateCandyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -187,6 +249,13 @@ declare module '@tanstack/react-router' {
       path: '/library'
       fullPath: '/library'
       preLoaderRoute: typeof LibraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hanja': {
+      id: '/hanja'
+      path: '/hanja'
+      fullPath: '/hanja'
+      preLoaderRoute: typeof HanjaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chat': {
@@ -217,6 +286,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chat/$threadId': {
+      id: '/chat/$threadId'
+      path: '/$threadId'
+      fullPath: '/chat/$threadId'
+      preLoaderRoute: typeof ChatThreadIdRouteImport
+      parentRoute: typeof ChatRoute
+    }
+    '/api/generate-candy': {
+      id: '/api/generate-candy'
+      path: '/api/generate-candy'
+      fullPath: '/api/generate-candy'
+      preLoaderRoute: typeof ApiGenerateCandyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -224,11 +307,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/quiz': {
+      id: '/_authenticated/quiz'
+      path: '/quiz'
+      fullPath: '/quiz'
+      preLoaderRoute: typeof AuthenticatedQuizRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/onboarding': {
       id: '/_authenticated/onboarding'
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/home': {
+      id: '/_authenticated/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AuthenticatedHomeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/courses': {
@@ -261,27 +358,53 @@ const AuthenticatedCoursesRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCoursesRoute: typeof AuthenticatedCoursesRouteWithChildren
+  AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedQuizRoute: typeof AuthenticatedQuizRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCoursesRoute: AuthenticatedCoursesRouteWithChildren,
+  AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedQuizRoute: AuthenticatedQuizRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ChatRouteChildren {
+  ChatThreadIdRoute: typeof ChatThreadIdRoute
+}
+
+const ChatRouteChildren: ChatRouteChildren = {
+  ChatThreadIdRoute: ChatThreadIdRoute,
+}
+
+const ChatRouteWithChildren = ChatRoute._addFileChildren(ChatRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  ChatRoute: ChatRoute,
+  ChatRoute: ChatRouteWithChildren,
+  HanjaRoute: HanjaRoute,
   LibraryRoute: LibraryRoute,
   ReadRoute: ReadRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiGenerateCandyRoute: ApiGenerateCandyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

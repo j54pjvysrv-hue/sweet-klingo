@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Volume2, X, Bookmark, ChevronLeft, ChevronRight, Settings2, Eye, EyeOff, MessageCircleHeart, Languages } from "lucide-react";
+import { Volume2, Bookmark, ChevronLeft, ChevronRight, Settings2, Eye, EyeOff, MessageCircleHeart, Languages } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Markdown } from "@/components/markdown";
 
 export type Token = {
   text: string;
@@ -28,6 +29,8 @@ export type Passage = {
 
 type TranslationMode = "off" | "tap" | "always";
 
+type HanjaMatch = { character: string; korean_reading: string; meaning: string };
+
 export function CandyReader({ passage }: { passage: Passage }) {
   const sentences = passage.lines;
   const [focused, setFocused] = useState<number | null>(null);
@@ -37,8 +40,23 @@ export function CandyReader({ passage }: { passage: Passage }) {
   const [trMode, setTrMode] = useState<TranslationMode>("tap");
   const [trShownIdx, setTrShownIdx] = useState<Set<number>>(new Set());
   const [showSettings, setShowSettings] = useState(false);
+  const [hanja, setHanja] = useState<HanjaMatch[]>([]);
 
   const token = activeToken != null ? sentences[activeToken.line]?.[activeToken.idx] : undefined;
+
+  // Look up hanja entries whose Korean reading matches a syllable in the active word
+  useEffect(() => {
+    if (!token?.text) { setHanja([]); return; }
+    const word = token.text.trim();
+    const syllables = Array.from(word).filter((c) => /[\uAC00-\uD7AF]/.test(c));
+    if (syllables.length === 0) { setHanja([]); return; }
+    supabase
+      .from("hanja")
+      .select("character, korean_reading, meaning")
+      .in("korean_reading", syllables)
+      .limit(6)
+      .then(({ data }) => setHanja((data ?? []) as HanjaMatch[]));
+  }, [token]);
 
   // Keyboard navigation in focus mode
   useEffect(() => {
@@ -228,15 +246,32 @@ export function CandyReader({ passage }: { passage: Passage }) {
                   </div>
                 )}
                 {token.info.grammar && (
-                  <div>
-                    <span className="font-semibold text-foreground">Grammar · </span>
-                    <span className="text-muted-foreground">{token.info.grammar}</span>
+                  <div className="rounded-lg bg-secondary/40 p-3">
+                    <div className="text-xs font-semibold uppercase tracking-wider text-primary">Grammar</div>
+                    <Markdown className="prose-p:my-1 text-sm">{token.info.grammar}</Markdown>
                   </div>
                 )}
                 {token.info.note && (
                   <div className="rounded-lg bg-secondary/60 p-3 text-muted-foreground">
-                    <span className="font-semibold text-primary">Sana’s note · </span>
+                    <span className="font-semibold text-primary">Sana's note · </span>
                     {token.info.note}
+                  </div>
+                )}
+                {hanja.length > 0 && (
+                  <div className="rounded-lg border border-border bg-card p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-primary">Hanja roots</span>
+                      <Link to="/hanja" className="text-[11px] font-medium text-primary hover:underline">Open lookup →</Link>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {hanja.map((h) => (
+                        <div key={h.character} className="flex items-center gap-2 rounded-full bg-secondary px-2.5 py-1">
+                          <span className="font-korean text-lg text-primary">{h.character}</span>
+                          <span className="font-korean text-xs text-foreground">{h.korean_reading}</span>
+                          <span className="text-[11px] text-muted-foreground">{h.meaning}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
