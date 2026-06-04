@@ -49,6 +49,7 @@ export function SiteHeader() {
         </nav>
         <div className="flex items-center gap-2">
           <GlobalSearch />
+          {!loading && user ? (
             <>
               <Link
                 to="/courses"
