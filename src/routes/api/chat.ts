@@ -2,39 +2,53 @@ import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
-const SANA_SYSTEM = `You are Sana, the warm, encouraging AI Korean tutor inside the Sweet language-learning app.
+const SANA_SYSTEM = `You are Sana, the warm AI Korean tutor inside the Sweet language-learning app.
 
-Personality: friendly, patient, a little playful — like a thoughtful Korean friend who happens to be a brilliant linguist. Use the learner's name if they share it. Celebrate small wins.
+Be friendly, patient, a little playful — like a thoughtful Korean friend who loves linguistics. Celebrate small wins.
 
 What you do best:
-- Break down Korean grammar (particles, verb conjugations, tense, honorifics, politeness levels).
-- Explain WHY a native speaker would phrase something a certain way, not just what it means.
-- Compare alternatives (e.g. -아서 vs -니까, 은/는 vs 이/가) with short, real examples.
-- Generate fresh example sentences and short practice prompts when helpful.
-- Offer roleplay (café, workplace, K-drama scene) when a learner wants to practice.
-- Clarify cultural nuance, slang, and TOPIK-style structures.
+- Break down Korean grammar (particles, conjugations, tense, honorifics, politeness levels)
+- Explain WHY natives phrase things a certain way
+- Compare alternatives (e.g. -아서 vs -니까, 은/는 vs 이/가) with short examples
+- Generate fresh example sentences and practice prompts
+- Offer roleplay (café, workplace, K-drama) when helpful
+- Clarify cultural nuance, slang, TOPIK structures, and Hanja roots when relevant
 
 Formatting:
-- Reply in clean Markdown. Keep paragraphs short.
-- When you show Korean, follow it with a romanization in parentheses and a natural English gloss, e.g. **밥 먹었어요?** *(bap meogeosseoyo?)* — "Did you eat?"
-- Use small headings or bullet lists when comparing structures.
-- Never dump huge tables. Stay conversational.
+- Reply in clean Markdown. Short paragraphs.
+- Korean: **밥 먹었어요?** *(bap meogeosseoyo?)* — "Did you eat?"
+- Use small headings or bullets when comparing structures
+- Never dump huge tables. Stay conversational
 
-If a learner pastes Korean, gently break it down: meaning, key grammar, and one tip. Always end with a light question or invitation to keep practicing.`;
+End with a light question or invitation to keep practicing.`;
 
-type ChatRequestBody = { messages?: unknown };
+type ChatRequestBody = { messages?: unknown; threadId?: string };
 
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const { messages } = (await request.json()) as ChatRequestBody;
-        if (!Array.isArray(messages)) {
-          return new Response("Messages are required", { status: 400 });
-        }
+        const body = (await request.json()) as ChatRequestBody;
+        const messages = body.messages;
+        const threadId = body.threadId;
+        if (!Array.isArray(messages)) return new Response("Messages required", { status: 400 });
 
         const key = process.env.LOVABLE_API_KEY;
         if (!key) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
+
+        // Resolve user from bearer
+        const authHeader = request.headers.get("authorization") || request.headers.get("Authorization");
+        let userId: string | null = null;
+        if (authHeader?.startsWith("Bearer ")) {
+          try {
+            const token = authHeader.slice(7);
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            const { data } = await supabaseAdmin.auth.getUser(token);
+            userId = data?.user?.id ?? null;
+          } catch (e) {
+            console.warn("auth resolve failed", e);
+          }
+        }
 
         try {
           const gateway = createLovableAiGatewayProvider(key);
@@ -45,17 +59,40 @@ export const Route = createFileRoute("/api/chat")({
             messages: await convertToModelMessages(messages as UIMessage[]),
           });
 
+          const original = messages as UIMessage[];
           return result.toUIMessageStreamResponse({
-            originalMessages: messages as UIMessage[],
+            originalMessages: original,
+            onFinish: async ({ messages: finalMessages }) => {
+              if (!userId || !threadId) return;
+              try {
+                const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+                // Persist any messages not already saved by examining the last user msg + new assistant msg
+                const newOnes = finalMessages.slice(-2); // user + assistant most-recent pair
+                for (const m of newOnes) {
+                  await supabaseAdmin.from("chat_messages").insert({
+                    thread_id: threadId,
+                    user_id: userId,
+                    role: m.role,
+                    parts: m.parts as unknown as object,
+                  });
+                }
+                await supabaseAdmin
+                  .from("chat_threads")
+                  .update({ updated_at: new Date().toISOString() })
+                  .eq("id", threadId)
+                  .eq("user_id", userId);
+              } catch (e) {
+                console.error("persist chat error", e);
+              }
+            },
             onError: (error) => {
-              console.error("Sana chat stream error", error);
-              if (error instanceof Error) return error.message;
-              return "Sana hit an unexpected error. Please try again.";
+              console.error("Sana stream error", error);
+              return error instanceof Error ? error.message : "Sana hit an error.";
             },
           });
         } catch (err) {
-          console.error("Sana chat handler error", err);
-          return new Response("Sana is briefly unavailable. Please try again.", { status: 500 });
+          console.error("chat handler error", err);
+          return new Response("Sana is briefly unavailable.", { status: 500 });
         }
       },
     },
