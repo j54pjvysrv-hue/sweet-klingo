@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Volume2, X, Bookmark, ChevronLeft, ChevronRight, Settings2, Eye, EyeOff, MessageCircleHeart, Languages } from "lucide-react";
+import { Volume2, Bookmark, ChevronLeft, ChevronRight, Settings2, Eye, EyeOff, MessageCircleHeart, Languages } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Markdown } from "@/components/markdown";
 
 export type Token = {
   text: string;
