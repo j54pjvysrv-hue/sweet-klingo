@@ -20,6 +20,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChatThreadIdRouteImport } from './routes/chat.$threadId'
 import { Route as ApiGenerateCandyRouteImport } from './routes/api/generate-candy'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AuthenticatedQuizRouteImport } from './routes/_authenticated/quiz'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedCoursesRouteImport } from './routes/_authenticated/courses'
@@ -79,6 +80,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedQuizRoute = AuthenticatedQuizRouteImport.update({
+  id: '/quiz',
+  path: '/quiz',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -112,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/courses': typeof AuthenticatedCoursesRouteWithChildren
   '/home': typeof AuthenticatedHomeRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/quiz': typeof AuthenticatedQuizRoute
   '/api/chat': typeof ApiChatRoute
   '/api/generate-candy': typeof ApiGenerateCandyRoute
   '/chat/$threadId': typeof ChatThreadIdRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByTo {
   '/courses': typeof AuthenticatedCoursesRouteWithChildren
   '/home': typeof AuthenticatedHomeRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/quiz': typeof AuthenticatedQuizRoute
   '/api/chat': typeof ApiChatRoute
   '/api/generate-candy': typeof ApiGenerateCandyRoute
   '/chat/$threadId': typeof ChatThreadIdRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   '/_authenticated/courses': typeof AuthenticatedCoursesRouteWithChildren
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/quiz': typeof AuthenticatedQuizRoute
   '/api/chat': typeof ApiChatRoute
   '/api/generate-candy': typeof ApiGenerateCandyRoute
   '/chat/$threadId': typeof ChatThreadIdRoute
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
     | '/courses'
     | '/home'
     | '/onboarding'
+    | '/quiz'
     | '/api/chat'
     | '/api/generate-candy'
     | '/chat/$threadId'
@@ -180,6 +190,7 @@ export interface FileRouteTypes {
     | '/courses'
     | '/home'
     | '/onboarding'
+    | '/quiz'
     | '/api/chat'
     | '/api/generate-candy'
     | '/chat/$threadId'
@@ -197,6 +208,7 @@ export interface FileRouteTypes {
     | '/_authenticated/courses'
     | '/_authenticated/home'
     | '/_authenticated/onboarding'
+    | '/_authenticated/quiz'
     | '/api/chat'
     | '/api/generate-candy'
     | '/chat/$threadId'
@@ -295,6 +307,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/quiz': {
+      id: '/_authenticated/quiz'
+      path: '/quiz'
+      fullPath: '/quiz'
+      preLoaderRoute: typeof AuthenticatedQuizRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/onboarding': {
       id: '/_authenticated/onboarding'
       path: '/onboarding'
@@ -341,12 +360,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCoursesRoute: typeof AuthenticatedCoursesRouteWithChildren
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedQuizRoute: typeof AuthenticatedQuizRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCoursesRoute: AuthenticatedCoursesRouteWithChildren,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedQuizRoute: AuthenticatedQuizRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
