@@ -1,16 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Sparkles } from "lucide-react";
+import { Search, Sparkles, Loader2 } from "lucide-react";
 import { CATEGORY_LABELS, LEVELS } from "@/lib/levels";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/library")({
   head: () => ({
     meta: [
       { title: "Candy Library — Sweet" },
       { name: "description", content: "Browse Korean Candy by topic and level. Generate custom stories with AI." },
-      { property: "og:title", content: "Candy Library — Sweet" },
-      { property: "og:description", content: "Browse Korean Candy by topic and level. Generate custom stories with AI." },
     ],
   }),
   component: LibraryPage,
