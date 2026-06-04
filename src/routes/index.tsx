@@ -33,16 +33,18 @@ function HomePage() {
     <div>
       {/* HERO */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-hero" />
+        <div className="absolute inset-0 bg-gradient-hero animate-fade-in" />
         <img
           src={heroBlossoms}
           alt=""
           aria-hidden
           width={1600}
           height={1200}
-          className="absolute inset-0 h-full w-full object-cover opacity-50 mix-blend-multiply"
+          className="absolute inset-0 h-full w-full animate-fade-in-slow object-cover opacity-50 mix-blend-multiply"
         />
-        <Petals count={18} />
+        <div className="animate-fade-in-slow">
+          <Petals count={18} />
+        </div>
         <div className="relative mx-auto max-w-6xl px-5 pb-20 pt-16 sm:pt-24 md:pb-28">
           <div className="animate-fade-up mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary backdrop-blur">
