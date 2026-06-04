@@ -29,6 +29,8 @@ export type Passage = {
 
 type TranslationMode = "off" | "tap" | "always";
 
+type HanjaMatch = { character: string; korean_reading: string; meaning: string };
+
 export function CandyReader({ passage }: { passage: Passage }) {
   const sentences = passage.lines;
   const [focused, setFocused] = useState<number | null>(null);
@@ -38,8 +40,23 @@ export function CandyReader({ passage }: { passage: Passage }) {
   const [trMode, setTrMode] = useState<TranslationMode>("tap");
   const [trShownIdx, setTrShownIdx] = useState<Set<number>>(new Set());
   const [showSettings, setShowSettings] = useState(false);
+  const [hanja, setHanja] = useState<HanjaMatch[]>([]);
 
   const token = activeToken != null ? sentences[activeToken.line]?.[activeToken.idx] : undefined;
+
+  // Look up hanja entries whose Korean reading matches a syllable in the active word
+  useEffect(() => {
+    if (!token?.text) { setHanja([]); return; }
+    const word = token.text.trim();
+    const syllables = Array.from(word).filter((c) => /[\uAC00-\uD7AF]/.test(c));
+    if (syllables.length === 0) { setHanja([]); return; }
+    supabase
+      .from("hanja")
+      .select("character, korean_reading, meaning")
+      .in("korean_reading", syllables)
+      .limit(6)
+      .then(({ data }) => setHanja((data ?? []) as HanjaMatch[]));
+  }, [token]);
 
   // Keyboard navigation in focus mode
   useEffect(() => {
