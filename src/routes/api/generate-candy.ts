@@ -152,13 +152,15 @@ export const Route = createFileRoute("/api/generate-candy")({
             .select("id")
             .single();
 
-          if (error) return json({ error: `Saved failed: ${error.message}` }, 500);
+          if (error) {
+            console.error("generate-candy insert error", error);
+            return json({ error: "Could not save your Candy. Please try again." }, 500);
+          }
 
           return json({ id: data.id, slug }, 200);
         } catch (err) {
           console.error("generate-candy fatal:", err);
-          const message = err instanceof Error ? err.message : "Unexpected error";
-          return new Response(JSON.stringify({ error: message }), {
+          return new Response(JSON.stringify({ error: "Generation failed. Please try again." }), {
             status: 500,
             headers: { "Content-Type": "application/json" },
           });
