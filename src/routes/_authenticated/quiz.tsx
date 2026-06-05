@@ -58,9 +58,18 @@ function QuizPage() {
     const score = QUESTIONS.reduce((s, qq) => (answers[qq.id] === qq.correct ? s + 1 : s), 0);
     const level = scoreToLevel(score);
     setSuggested(level);
-    const { data: u } = await supabase.auth.getUser();
-    if (u.user) {
-      await supabase.from("quiz_results").insert({ user_id: u.user.id, score, total: QUESTIONS.length, suggested_level: level, answers });
+    const { data: sess } = await supabase.auth.getSession();
+    const token = sess.session?.access_token;
+    if (token) {
+      try {
+        await fetch("/api/quiz-submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ score, total: QUESTIONS.length, suggested_level: level, answers }),
+        });
+      } catch (e) {
+        console.error("quiz submit failed", e);
+      }
     }
     setDone(true);
     setBusy(false);
@@ -88,7 +97,7 @@ function QuizPage() {
           <Sparkles className="mx-auto h-10 w-10 text-primary" />
           <h1 className="mt-4 font-display text-3xl font-bold sm:text-4xl">Your level: {suggested}</h1>
           <p className="mt-3 text-muted-foreground">
-            Based on your answers, Sweet will personalize your courses, Candy passages, and Sana hints to <strong>{suggested}</strong>.
+            Based on your answers, Sweet will personalize your courses, Candy passages, and Soyeon hints to <strong>{suggested}</strong>.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <button onClick={accept} disabled={busy} className="rounded-full bg-gradient-blossom px-6 py-3 text-base font-semibold text-primary-foreground shadow-petal hover:scale-[1.02] disabled:opacity-50">

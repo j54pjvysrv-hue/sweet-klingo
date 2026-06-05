@@ -9,7 +9,7 @@ export function SiteFooter() {
         <div className="flex gap-4">
           <Link to="/library" className="hover:text-primary">Library</Link>
           <Link to="/read" className="hover:text-primary">Candy</Link>
-          <Link to="/chat" className="hover:text-primary">Sana</Link>
+          <Link to="/chat" className="hover:text-primary">Soyeon</Link>
         </div>
       </div>
     </footer>

@@ -130,7 +130,7 @@ function HomeProgress() {
           </Link>
           <Link to="/chat" className="rounded-3xl border border-border bg-card p-6 shadow-petal transition-all hover:-translate-y-1 hover:border-primary">
             <MessagesSquare className="h-5 w-5 text-primary" />
-            <h3 className="mt-3 font-display text-lg font-semibold">Ask Sana</h3>
+            <h3 className="mt-3 font-display text-lg font-semibold">Ask Soyeon</h3>
             <p className="mt-1 text-sm text-muted-foreground">Threaded conversations — your context is remembered.</p>
           </Link>
           <Link to="/hanja" className="rounded-3xl border border-border bg-card p-6 shadow-petal transition-all hover:-translate-y-1 hover:border-primary">

@@ -214,6 +214,39 @@ export type Database = {
         }
         Relationships: []
       }
+      grammar_patterns: {
+        Row: {
+          created_at: string
+          examples: Json
+          id: string
+          level: string
+          meaning: string
+          pattern: string
+          structure: string | null
+          tags: string[]
+        }
+        Insert: {
+          created_at?: string
+          examples?: Json
+          id?: string
+          level?: string
+          meaning: string
+          pattern: string
+          structure?: string | null
+          tags?: string[]
+        }
+        Update: {
+          created_at?: string
+          examples?: Json
+          id?: string
+          level?: string
+          meaning?: string
+          pattern?: string
+          structure?: string | null
+          tags?: string[]
+        }
+        Relationships: []
+      }
       hanja: {
         Row: {
           character: string

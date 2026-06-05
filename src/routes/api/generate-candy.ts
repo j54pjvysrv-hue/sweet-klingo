@@ -12,6 +12,8 @@ const TokenSchema = z.object({
       pos: z.string().optional().nullable(),
       grammar: z.string().optional().nullable(),
       note: z.string().optional().nullable(),
+      pattern: z.string().optional().nullable(),
+      pattern_examples: z.array(z.object({ ko: z.string(), en: z.string() })).optional().nullable(),
     })
     .optional()
     .nullable(),
@@ -39,8 +41,8 @@ Output ONLY JSON matching this shape — no prose, no code fences:
  "english_hint": "one sentence in English",
  "lines": [
    [
-     {"text": "한국어 ", "info": {"romanization":"hangugeo","meaning":"Korean (language)","pos":"noun","grammar":"optional","note":"optional"}},
-     {"text": "재미있어요", "info": {"romanization":"jaemiisseoyo","meaning":"is fun","pos":"verb"}},
+     {"text": "한국어 ", "info": {"romanization":"hangugeo","meaning":"Korean (language)","pos":"noun"}},
+     {"text": "재미있어요", "info": {"romanization":"jaemiisseoyo","meaning":"is fun","pos":"adjective","grammar":"-아요 polite present","pattern":"-아요/어요","pattern_examples":[{"ko":"맛있어요","en":"It is delicious"},{"ko":"좋아요","en":"It is good"}]}},
      {"text": "."}
    ]
  ]
@@ -50,51 +52,88 @@ Rules:
 - 6–12 sentences, each sentence is an array of tokens
 - Plain punctuation tokens (period, comma, !, ?) have NO "info"
 - Every content word/particle SHOULD have "info" with romanization + meaning
+- When a word demonstrates a key grammar pattern, include "pattern" (e.g. "-아서/어서", "-(으)면", "-고 있다") and 2 "pattern_examples"
 - Match the level: L1 = simple polite present/past; L3 = mix banmal/grammar; L5 = literary/nuanced
 - Always return valid JSON, nothing else`;
+
+async function attemptGeneration(prompt: string, level: string, apiKey: string) {
+  const gateway = createLovableAiGatewayProvider(apiKey);
+  const model = gateway("google/gemini-3-flash-preview");
+  const userPrompt = `Target level: ${level}\nLearner request: ${prompt}\n\nReturn JSON only.`;
+
+  const result = await generateText({ model, system: SYSTEM, prompt: userPrompt });
+
+  let raw = result.text?.trim() || "";
+  raw = raw.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    const m = raw.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error("Model did not return JSON");
+    parsed = JSON.parse(m[0]);
+  }
+
+  return PassageSchema.parse(parsed);
+}
 
 export const Route = createFileRoute("/api/generate-candy")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const json = (body: object, status = 200) =>
+          new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
+
         try {
+          // Require authentication to prevent anonymous abuse of LOVABLE_API_KEY
+          const authHeader = request.headers.get("authorization") ?? "";
+          if (!authHeader.toLowerCase().startsWith("bearer ")) {
+            return json({ error: "Please sign in to generate Candy." }, 401);
+          }
+          const bearer = authHeader.slice(7);
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser(bearer);
+          if (userErr || !userData?.user) {
+            return json({ error: "Your session has expired. Please sign in again." }, 401);
+          }
+
           const body = (await request.json()) as { prompt?: string; level?: string };
           const prompt = String(body?.prompt || "").trim();
           const level = (body?.level || "L2") as "L1" | "L2" | "L3" | "L4" | "L5";
-          if (!prompt) return new Response(JSON.stringify({ error: "Prompt is required" }), { status: 400, headers: { "Content-Type": "application/json" } });
+          if (!prompt) return json({ error: "Please describe what you'd like to read about." }, 400);
+          if (prompt.length > 500) return json({ error: "Prompt is too long (keep it under 500 characters)." }, 400);
 
           const key = process.env.LOVABLE_API_KEY;
-          if (!key) return new Response(JSON.stringify({ error: "Missing LOVABLE_API_KEY" }), { status: 500, headers: { "Content-Type": "application/json" } });
+          if (!key) return json({ error: "AI service is not configured. Please contact support." }, 500);
 
-          const gateway = createLovableAiGatewayProvider(key);
-          const model = gateway("google/gemini-3-flash-preview");
-
-          const userPrompt = `Target level: ${level}\nLearner request: ${prompt}\n\nReturn JSON only.`;
-
-          const result = await generateText({
-            model,
-            system: SYSTEM,
-            prompt: userPrompt,
-          });
-
-          let raw = result.text?.trim() || "";
-          // Strip code fences if any
-          raw = raw.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
-
-          let parsed: unknown;
-          try {
-            parsed = JSON.parse(raw);
-          } catch {
-            // Try to extract first {...} block
-            const m = raw.match(/\{[\s\S]*\}/);
-            if (!m) throw new Error("Model did not return JSON");
-            parsed = JSON.parse(m[0]);
+          // Retry up to 3 times on transient/parse errors
+          let passage: z.infer<typeof PassageSchema> | null = null;
+          let lastError: unknown = null;
+          for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+              passage = await attemptGeneration(prompt, level, key);
+              break;
+            } catch (e) {
+              lastError = e;
+              console.warn(`generate-candy attempt ${attempt} failed:`, e instanceof Error ? e.message : e);
+              if (attempt < 3) await new Promise((r) => setTimeout(r, 600 * attempt));
+            }
           }
 
-          const passage = PassageSchema.parse(parsed);
+          if (!passage) {
+            const msg = lastError instanceof Error ? lastError.message : "Generation failed";
+            // Categorise common errors
+            if (/rate|429|quota/i.test(msg))
+              return json({ error: "Soyeon is busy right now — please try again in a moment." }, 429);
+            if (/payment|402|credits/i.test(msg))
+              return json({ error: "AI credits exhausted. Please add credits in Lovable Cloud." }, 402);
+            if (/JSON|parse|schema|validation/i.test(msg))
+              return json({ error: "Couldn't format that into a Candy. Try a clearer topic (e.g. 'Café small talk, focus on -아요')." }, 422);
+            console.error("generate-candy give-up:", msg);
+            return json({ error: "Generation failed. Please try again." }, 500);
+          }
 
-          // Insert via service role
-          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const slug = `gen-${Date.now().toString(36)}`;
           const { data, error } = await supabaseAdmin
             .from("candy_passages")
@@ -113,16 +152,18 @@ export const Route = createFileRoute("/api/generate-candy")({
             .select("id")
             .single();
 
-          if (error) throw new Error(error.message);
+          if (error) {
+            console.error("generate-candy insert error", error);
+            return json({ error: "Could not save your Candy. Please try again." }, 500);
+          }
 
-          return new Response(JSON.stringify({ id: data.id, slug }), {
-            status: 200,
+          return json({ id: data.id, slug }, 200);
+        } catch (err) {
+          console.error("generate-candy fatal:", err);
+          return new Response(JSON.stringify({ error: "Generation failed. Please try again." }), {
+            status: 500,
             headers: { "Content-Type": "application/json" },
           });
-        } catch (err) {
-          console.error("generate-candy error", err);
-          const message = err instanceof Error ? err.message : "Generation failed";
-          return new Response(JSON.stringify({ error: message }), { status: 500, headers: { "Content-Type": "application/json" } });
         }
       },
     },

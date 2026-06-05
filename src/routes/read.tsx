@@ -24,7 +24,7 @@ export const Route = createFileRoute("/read")({
 });
 
 function ReadPage() {
-  const { passage: passageId } = Route.useSearch();
+  const { passage: passageId, lesson: lessonId } = Route.useSearch();
   const [passage, setPassage] = useState<Passage>(cafePassage);
   const [loading, setLoading] = useState(!!passageId);
 
@@ -46,11 +46,12 @@ function ReadPage() {
             topic: data.topic,
             englishHint: data.english_hint ?? undefined,
             lines: body.lines ?? [],
+            lessonId: lessonId,
           });
         }
         setLoading(false);
       });
-  }, [passageId]);
+  }, [passageId, lessonId]);
 
   return (
     <div className="mx-auto max-w-3xl px-5 py-10 sm:py-14">
@@ -76,7 +77,7 @@ function ReadPage() {
           search={{ passage: passage.id } as never}
           className="inline-flex items-center gap-2 rounded-full bg-gradient-blossom px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-petal hover:scale-[1.02]"
         >
-          Ask Sana about this passage <ArrowRight className="h-4 w-4" />
+          Ask Soyeon about this passage <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
     </div>

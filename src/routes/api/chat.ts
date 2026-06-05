@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
-const SANA_SYSTEM = `You are Sana, the warm AI Korean tutor inside the Sweet language-learning app.
+const SANA_SYSTEM = `You are Soyeon, the warm AI Korean tutor inside the Sweet language-learning app.
 
 Be friendly, patient, a little playful — like a thoughtful Korean friend who loves linguistics. Celebrate small wins.
 
@@ -86,13 +86,13 @@ export const Route = createFileRoute("/api/chat")({
               }
             },
             onError: (error) => {
-              console.error("Sana stream error", error);
-              return error instanceof Error ? error.message : "Sana hit an error.";
+              console.error("Soyeon stream error", error);
+              return error instanceof Error ? error.message : "Soyeon hit an error.";
             },
           });
         } catch (err) {
           console.error("chat handler error", err);
-          return new Response("Sana is briefly unavailable.", { status: 500 });
+          return new Response("Soyeon is briefly unavailable.", { status: 500 });
         }
       },
     },

@@ -156,7 +156,7 @@ export function GlobalSearch({ trigger }: { trigger?: React.ReactNode }) {
           )}
           <CommandGroup heading="Jump to">
             <CommandItem onSelect={() => { setOpen(false); navigate({ to: "/chat" }); }}>
-              <MessagesSquare className="mr-2 h-4 w-4 text-primary" /> Open Sana chat
+              <MessagesSquare className="mr-2 h-4 w-4 text-primary" /> Open Soyeon chat
             </CommandItem>
             <CommandItem onSelect={() => { setOpen(false); navigate({ to: "/hanja" }); }}>
               <span className="mr-2 font-korean text-primary">漢</span> Hanja lookup

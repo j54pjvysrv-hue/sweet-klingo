@@ -13,8 +13,8 @@ export const Route = createFileRoute("/chat")({
   }),
   head: () => ({
     meta: [
-      { title: "Chat with Sana — Sweet" },
-      { name: "description", content: "Threaded conversations with Sana, your AI Korean tutor." },
+      { title: "Chat with Soyeon — Sweet" },
+      { name: "description", content: "Threaded conversations with Soyeon, your AI Korean tutor." },
     ],
   }),
   component: ChatIndex,
@@ -48,7 +48,7 @@ function ChatIndex() {
           .from("chat_threads")
           .insert({
             user_id: userRes.user.id,
-            title: hasContext ? "New conversation" : "Sana",
+            title: hasContext ? "New conversation" : "Soyeon",
             context: hasContext ? (search as unknown as never) : null,
           })
           .select("id")
@@ -71,7 +71,7 @@ function ChatIndex() {
   return (
     <div className="mx-auto flex h-[60vh] max-w-3xl items-center justify-center px-5">
       <div className="text-center text-sm text-muted-foreground">
-        <Sparkles className="mx-auto mb-2 h-5 w-5 text-primary" /> Opening a Sana thread…
+        <Sparkles className="mx-auto mb-2 h-5 w-5 text-primary" /> Opening a Soyeon thread…
       </div>
     </div>
   );
