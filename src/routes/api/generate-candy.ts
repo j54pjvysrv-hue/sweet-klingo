@@ -130,10 +130,10 @@ export const Route = createFileRoute("/api/generate-candy")({
               return json({ error: "AI credits exhausted. Please add credits in Lovable Cloud." }, 402);
             if (/JSON|parse|schema|validation/i.test(msg))
               return json({ error: "Couldn't format that into a Candy. Try a clearer topic (e.g. 'Café small talk, focus on -아요')." }, 422);
-            return json({ error: `Generation failed: ${msg.slice(0, 200)}` }, 500);
+            console.error("generate-candy give-up:", msg);
+            return json({ error: "Generation failed. Please try again." }, 500);
           }
 
-          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const slug = `gen-${Date.now().toString(36)}`;
           const { data, error } = await supabaseAdmin
             .from("candy_passages")
