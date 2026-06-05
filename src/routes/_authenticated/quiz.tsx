@@ -58,9 +58,18 @@ function QuizPage() {
     const score = QUESTIONS.reduce((s, qq) => (answers[qq.id] === qq.correct ? s + 1 : s), 0);
     const level = scoreToLevel(score);
     setSuggested(level);
-    const { data: u } = await supabase.auth.getUser();
-    if (u.user) {
-      await supabase.from("quiz_results").insert({ user_id: u.user.id, score, total: QUESTIONS.length, suggested_level: level, answers });
+    const { data: sess } = await supabase.auth.getSession();
+    const token = sess.session?.access_token;
+    if (token) {
+      try {
+        await fetch("/api/quiz-submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ score, total: QUESTIONS.length, suggested_level: level, answers }),
+        });
+      } catch (e) {
+        console.error("quiz submit failed", e);
+      }
     }
     setDone(true);
     setBusy(false);
