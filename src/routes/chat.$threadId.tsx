@@ -2,10 +2,11 @@ import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-r
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Send, Sparkles, Trash2, X } from "lucide-react";
+import { Plus, Send, Sparkles, Trash2, X, Menu } from "lucide-react";
 import soyeonAvatar from "@/assets/soyeon-avatar.png";
 import { supabase } from "@/integrations/supabase/client";
 import { Markdown } from "@/components/markdown";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { toast } from "sonner";
 
 type ChatSearch = { passage?: string; sentence?: string; word?: string };
@@ -37,15 +38,19 @@ function ThreadPage() {
   const [context, setContext] = useState<ChatSearch>(search);
   const [threads, setThreads] = useState<Thread[]>([]);
   const [initial, setInitial] = useState<UIMessage[] | null>(null);
+  const [hydrated, setHydrated] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { setContext(search); }, [search]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setToken(data.session?.access_token ?? null));
   }, []);
 
-  // Load thread list
+  // Thread list
   useEffect(() => {
     supabase
       .from("chat_threads")
@@ -54,9 +59,10 @@ function ThreadPage() {
       .then(({ data }) => setThreads(data ?? []));
   }, [threadId]);
 
-  // Load persisted messages for this thread
+  // Persisted messages
   useEffect(() => {
     setInitial(null);
+    setHydrated(null);
     supabase
       .from("chat_messages")
       .select("id, role, parts, created_at")
@@ -85,9 +91,13 @@ function ThreadPage() {
     transport,
   });
 
+  // Hydrate once per thread to avoid clobbering live messages
   useEffect(() => {
-    if (initial) setMessages(initial);
-  }, [initial, setMessages]);
+    if (initial && hydrated !== threadId) {
+      setMessages(initial);
+      setHydrated(threadId);
+    }
+  }, [initial, hydrated, threadId, setMessages]);
 
   const busy = status === "submitted" || status === "streaming";
 
@@ -117,16 +127,18 @@ function ThreadPage() {
 
   async function newThread() {
     const { data: userRes } = await supabase.auth.getUser();
-    if (!userRes.user) return;
+    if (!userRes.user) {
+      toast.error("Please sign in to start a conversation.");
+      navigate({ to: "/auth" });
+      return;
+    }
     const { data, error } = await supabase
       .from("chat_threads")
       .insert({ user_id: userRes.user.id, title: "New conversation" })
       .select("id")
       .single();
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
+    if (error) { toast.error(error.message); return; }
+    setMobileOpen(false);
     navigate({ to: "/chat/$threadId", params: { threadId: data.id } });
   }
 
@@ -137,34 +149,60 @@ function ThreadPage() {
     else setThreads((t) => t.filter((x) => x.id !== id));
   }
 
+  const ThreadList = (
+    <div className="flex h-full flex-col gap-2 p-3">
+      <button
+        onClick={newThread}
+        className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-blossom px-4 py-2 text-sm font-semibold text-primary-foreground shadow-petal hover:scale-[1.02]"
+      >
+        <Plus className="h-4 w-4" /> New chat
+      </button>
+      <div className="mt-2 flex-1 space-y-1 overflow-y-auto">
+        {threads.map((t) => (
+          <div key={t.id} className={"group flex items-center gap-1 rounded-lg pr-1 " + (t.id === threadId ? "bg-secondary" : "hover:bg-secondary/60")}>
+            <Link
+              to="/chat/$threadId"
+              params={{ threadId: t.id }}
+              onClick={() => setMobileOpen(false)}
+              className="flex-1 truncate px-2.5 py-2 text-sm text-foreground"
+            >
+              {t.title || "Conversation"}
+            </Link>
+            <button onClick={() => deleteThread(t.id)} className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:text-destructive">
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ))}
+        {threads.length === 0 && <p className="px-2 text-xs text-muted-foreground">No conversations yet.</p>}
+      </div>
+    </div>
+  );
+
   return (
     <div className="mx-auto grid h-[calc(100vh-4rem)] max-w-6xl grid-cols-1 gap-4 px-3 py-3 md:grid-cols-[260px_1fr] md:px-5">
-      {/* Sidebar */}
-      <aside className="hidden flex-col gap-2 overflow-hidden rounded-2xl border border-border bg-card p-3 md:flex">
-        <button
-          onClick={newThread}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-blossom px-4 py-2 text-sm font-semibold text-primary-foreground shadow-petal hover:scale-[1.02]"
-        >
-          <Plus className="h-4 w-4" /> New chat
-        </button>
-        <div className="mt-2 flex-1 space-y-1 overflow-y-auto">
-          {threads.map((t) => (
-            <div key={t.id} className={"group flex items-center gap-1 rounded-lg pr-1 " + (t.id === threadId ? "bg-secondary" : "hover:bg-secondary/60")}>
-              <Link to="/chat/$threadId" params={{ threadId: t.id }} className="flex-1 truncate px-2.5 py-2 text-sm text-foreground">
-                {t.title}
-              </Link>
-              <button onClick={() => deleteThread(t.id)} className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive">
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          ))}
-          {threads.length === 0 && <p className="px-2 text-xs text-muted-foreground">No conversations yet.</p>}
-        </div>
+      {/* Desktop sidebar */}
+      <aside className="hidden flex-col overflow-hidden rounded-2xl border border-border bg-card md:flex">
+        {ThreadList}
       </aside>
 
       {/* Conversation */}
       <div className="flex flex-col overflow-hidden">
         <div className="flex items-center gap-3 border-b border-border/60 pb-4">
+          {/* Mobile sidebar trigger */}
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetTrigger asChild>
+              <button aria-label="Conversations" className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card md:hidden">
+                <Menu className="h-4 w-4" />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-72 p-0">
+              <SheetHeader className="border-b border-border px-4 py-3">
+                <SheetTitle>Soyeon threads</SheetTitle>
+              </SheetHeader>
+              {ThreadList}
+            </SheetContent>
+          </Sheet>
+
           <img src={soyeonAvatar} alt="Soyeon" width={44} height={44} className="h-11 w-11 rounded-full bg-[color:var(--blossom-soft)]/40" />
           <div className="flex-1">
             <div className="font-display text-base font-semibold text-foreground">Soyeon</div>
