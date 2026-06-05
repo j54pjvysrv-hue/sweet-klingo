@@ -169,7 +169,7 @@ export function CandyReader({ passage }: { passage: Passage }) {
             search={{ passage: passage.id, sentence: koreanOnly } as never}
             className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 hover:border-primary hover:text-primary"
           >
-            <MessageCircleHeart className="h-3 w-3" /> Ask Sana
+            <MessageCircleHeart className="h-3 w-3" /> Ask Soyeon
           </Link>
         </div>
       </div>
@@ -253,7 +253,7 @@ export function CandyReader({ passage }: { passage: Passage }) {
                 )}
                 {token.info.note && (
                   <div className="rounded-lg bg-secondary/60 p-3 text-muted-foreground">
-                    <span className="font-semibold text-primary">Sana's note · </span>
+                    <span className="font-semibold text-primary">Soyeon's note · </span>
                     {token.info.note}
                   </div>
                 )}
@@ -294,7 +294,7 @@ export function CandyReader({ passage }: { passage: Passage }) {
                   className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium hover:border-primary hover:text-primary"
                   onClick={() => setActiveToken(null)}
                 >
-                  <MessageCircleHeart className="h-3.5 w-3.5" /> Ask Sana
+                  <MessageCircleHeart className="h-3.5 w-3.5" /> Ask Soyeon
                 </Link>
               </div>
             </>

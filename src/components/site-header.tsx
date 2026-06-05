@@ -10,7 +10,7 @@ const nav = [
   { to: "/library", label: "Library" },
   { to: "/read", label: "Candy" },
   { to: "/hanja", label: "Hanja" },
-  { to: "/chat", label: "Sana" },
+  { to: "/chat", label: "Soyeon" },
   { to: "/courses", label: "Courses" },
   { to: "/home", label: "Progress" },
 ] as const;

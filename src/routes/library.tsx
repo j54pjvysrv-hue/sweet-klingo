@@ -107,7 +107,7 @@ function LibraryPage() {
         </h1>
         <p className="mt-3 text-muted-foreground">
           Curated reading passages across daily life, K-drama, student life, career, TOPIK and culture.
-          Each one is tappable, narrated, and connected to Sana.
+          Each one is tappable, narrated, and connected to Soyeon.
         </p>
       </div>
 

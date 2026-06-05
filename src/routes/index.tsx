@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, Sparkles, Headphones, MessagesSquare, Wand2, Repeat } from "lucide-react";
 import heroBlossoms from "@/assets/hero-blossoms.jpg";
-import sanaAvatar from "@/assets/sana-avatar.png";
+import soyeonAvatar from "@/assets/soyeon-avatar.png";
 import { CandyReader } from "@/components/candy-reader";
 import { Petals } from "@/components/petals";
 import { cafePassage, candyLibrary } from "@/lib/sweet-content";
@@ -10,9 +10,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Sweet — Learn Korean through stories, not flashcards" },
-      { name: "description", content: "Read real Korean tailored to your level. Tap any word for instant grammar help. Chat with Sana, your AI Korean tutor." },
+      { name: "description", content: "Read real Korean tailored to your level. Tap any word for instant grammar help. Chat with Soyeon, your AI Korean tutor." },
       { property: "og:title", content: "Sweet — Learn Korean through stories" },
-      { property: "og:description", content: "AI-powered Korean immersion with tappable tooltips, personalized Candy lessons, and a tutor named Sana." },
+      { property: "og:description", content: "AI-powered Korean immersion with tappable tooltips, personalized Candy lessons, and a tutor named Soyeon." },
       { property: "og:image", content: heroBlossoms },
     ],
   }),
@@ -25,7 +25,7 @@ const pillars = [
   { icon: Sparkles, title: "Personalized Candy", body: "Generate bite-sized stories about cafés, K-dramas, your job, or anything you love." },
   { icon: Repeat, title: "Regenerative Review™", body: "Saved words quietly return inside new stories — review through meaning, not drilling." },
   { icon: Headphones, title: "Synchronized narration", body: "Native-quality audio reads with you, highlighting each word as it’s spoken." },
-  { icon: MessagesSquare, title: "Sana, your tutor", body: "A patient AI coach for grammar deep dives, roleplay, and TOPIK prep." },
+  { icon: MessagesSquare, title: "Soyeon, your tutor", body: "A patient AI coach for grammar deep dives, roleplay, and TOPIK prep." },
 ];
 
 function HomePage() {
@@ -121,13 +121,13 @@ function HomePage() {
           <div className="grid items-center gap-10 md:grid-cols-2">
             <div>
               <span className="inline-flex items-center gap-2 rounded-full bg-card px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
-                Meet Sana
+                Meet Soyeon
               </span>
               <h2 className="mt-4 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                 Your AI Korean tutor, on call.
               </h2>
               <p className="mt-3 max-w-md text-muted-foreground">
-                Sana explains grammar like a friend who actually loves linguistics. Ask
+                Soyeon explains grammar like a friend who actually loves linguistics. Ask
                 why <span className="font-korean text-foreground">은/는</span> vs{" "}
                 <span className="font-korean text-foreground">이/가</span>, request a
                 roleplay, or prep for TOPIK II.
@@ -142,9 +142,9 @@ function HomePage() {
             <div className="relative mx-auto w-full max-w-sm">
               <div className="rounded-3xl border border-border bg-card p-5 shadow-soft">
                 <div className="flex items-center gap-3">
-                  <img src={sanaAvatar} alt="Sana" width={48} height={48} className="h-12 w-12 rounded-full bg-[color:var(--blossom-soft)]/40" loading="lazy" />
+                  <img src={soyeonAvatar} alt="Soyeon" width={48} height={48} className="h-12 w-12 rounded-full bg-[color:var(--blossom-soft)]/40" loading="lazy" />
                   <div>
-                    <div className="font-display font-semibold text-foreground">Sana</div>
+                    <div className="font-display font-semibold text-foreground">Soyeon</div>
                     <div className="text-xs text-muted-foreground">AI Korean tutor</div>
                   </div>
                 </div>

@@ -76,7 +76,7 @@ function ReadPage() {
           search={{ passage: passage.id } as never}
           className="inline-flex items-center gap-2 rounded-full bg-gradient-blossom px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-petal hover:scale-[1.02]"
         >
-          Ask Sana about this passage <ArrowRight className="h-4 w-4" />
+          Ask Soyeon about this passage <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
     </div>
