@@ -86,6 +86,18 @@ export const Route = createFileRoute("/api/generate-candy")({
           new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 
         try {
+          // Require authentication to prevent anonymous abuse of LOVABLE_API_KEY
+          const authHeader = request.headers.get("authorization") ?? "";
+          if (!authHeader.toLowerCase().startsWith("bearer ")) {
+            return json({ error: "Please sign in to generate Candy." }, 401);
+          }
+          const bearer = authHeader.slice(7);
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser(bearer);
+          if (userErr || !userData?.user) {
+            return json({ error: "Your session has expired. Please sign in again." }, 401);
+          }
+
           const body = (await request.json()) as { prompt?: string; level?: string };
           const prompt = String(body?.prompt || "").trim();
           const level = (body?.level || "L2") as "L1" | "L2" | "L3" | "L4" | "L5";
