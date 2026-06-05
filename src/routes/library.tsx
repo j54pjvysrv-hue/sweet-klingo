@@ -75,18 +75,25 @@ function LibraryPage() {
     }
     setGenerating(true);
     try {
+      const { data: sess } = await supabase.auth.getSession();
+      const token = sess.session?.access_token;
+      if (!token) {
+        toast.error("Please sign in to generate Candy.");
+        navigate({ to: "/auth" });
+        return;
+      }
       const res = await fetch("/api/generate-candy", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ prompt, level: genLevel }),
       });
       const data = (await res.json()) as { id?: string; error?: string };
       if (!res.ok || !data.id) {
         toast.error(data.error || "Generation failed. Try a simpler prompt.");
-        setGenerating(false);
         return;
       }
       toast.success("Your Candy is ready 🍬");
+      await refresh();
       navigate({ to: "/read", search: { passage: data.id } as never });
     } catch (e) {
       console.error(e);
