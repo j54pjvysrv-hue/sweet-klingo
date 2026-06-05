@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS passages_authenticated_insert ON public.candy_passages;
