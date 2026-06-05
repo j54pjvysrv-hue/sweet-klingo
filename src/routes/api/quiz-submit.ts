@@ -27,8 +27,8 @@ export const Route = createFileRoute("/api/quiz-submit")({
             user_id: u.user.id,
             score,
             total,
-            suggested_level: level,
-            answers: body.answers ?? {},
+            suggested_level: level as "L1" | "L2" | "L3" | "L4" | "L5",
+            answers: (body.answers ?? {}) as never,
           });
           if (error) {
             console.error("quiz-submit insert:", error);
