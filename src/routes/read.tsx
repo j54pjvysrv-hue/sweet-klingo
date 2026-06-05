@@ -24,7 +24,7 @@ export const Route = createFileRoute("/read")({
 });
 
 function ReadPage() {
-  const { passage: passageId } = Route.useSearch();
+  const { passage: passageId, lesson: lessonId } = Route.useSearch();
   const [passage, setPassage] = useState<Passage>(cafePassage);
   const [loading, setLoading] = useState(!!passageId);
 
@@ -46,11 +46,12 @@ function ReadPage() {
             topic: data.topic,
             englishHint: data.english_hint ?? undefined,
             lines: body.lines ?? [],
+            lessonId: lessonId,
           });
         }
         setLoading(false);
       });
-  }, [passageId]);
+  }, [passageId, lessonId]);
 
   return (
     <div className="mx-auto max-w-3xl px-5 py-10 sm:py-14">
