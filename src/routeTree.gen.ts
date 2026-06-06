@@ -17,7 +17,9 @@ import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ChatIndexRouteImport } from './routes/chat.index'
 import { Route as ChatThreadIdRouteImport } from './routes/chat.$threadId'
+import { Route as ApiTranslateRouteImport } from './routes/api/translate'
 import { Route as ApiQuizSubmitRouteImport } from './routes/api/quiz-submit'
 import { Route as ApiGenerateCandyRouteImport } from './routes/api/generate-candy'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
@@ -66,10 +68,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatIndexRoute = ChatIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ChatRoute,
+} as any)
 const ChatThreadIdRoute = ChatThreadIdRouteImport.update({
   id: '/$threadId',
   path: '/$threadId',
   getParentRoute: () => ChatRoute,
+} as any)
+const ApiTranslateRoute = ApiTranslateRouteImport.update({
+  id: '/api/translate',
+  path: '/api/translate',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiQuizSubmitRoute = ApiQuizSubmitRouteImport.update({
   id: '/api/quiz-submit',
@@ -128,13 +140,14 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/api/generate-candy': typeof ApiGenerateCandyRoute
   '/api/quiz-submit': typeof ApiQuizSubmitRoute
+  '/api/translate': typeof ApiTranslateRoute
   '/chat/$threadId': typeof ChatThreadIdRoute
+  '/chat/': typeof ChatIndexRoute
   '/courses/$levelId': typeof AuthenticatedCoursesLevelIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/chat': typeof ChatRouteWithChildren
   '/hanja': typeof HanjaRoute
   '/library': typeof LibraryRoute
   '/read': typeof ReadRoute
@@ -146,7 +159,9 @@ export interface FileRoutesByTo {
   '/api/chat': typeof ApiChatRoute
   '/api/generate-candy': typeof ApiGenerateCandyRoute
   '/api/quiz-submit': typeof ApiQuizSubmitRoute
+  '/api/translate': typeof ApiTranslateRoute
   '/chat/$threadId': typeof ChatThreadIdRoute
+  '/chat': typeof ChatIndexRoute
   '/courses/$levelId': typeof AuthenticatedCoursesLevelIdRoute
 }
 export interface FileRoutesById {
@@ -166,7 +181,9 @@ export interface FileRoutesById {
   '/api/chat': typeof ApiChatRoute
   '/api/generate-candy': typeof ApiGenerateCandyRoute
   '/api/quiz-submit': typeof ApiQuizSubmitRoute
+  '/api/translate': typeof ApiTranslateRoute
   '/chat/$threadId': typeof ChatThreadIdRoute
+  '/chat/': typeof ChatIndexRoute
   '/_authenticated/courses/$levelId': typeof AuthenticatedCoursesLevelIdRoute
 }
 export interface FileRouteTypes {
@@ -186,13 +203,14 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/api/generate-candy'
     | '/api/quiz-submit'
+    | '/api/translate'
     | '/chat/$threadId'
+    | '/chat/'
     | '/courses/$levelId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
-    | '/chat'
     | '/hanja'
     | '/library'
     | '/read'
@@ -204,7 +222,9 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/api/generate-candy'
     | '/api/quiz-submit'
+    | '/api/translate'
     | '/chat/$threadId'
+    | '/chat'
     | '/courses/$levelId'
   id:
     | '__root__'
@@ -223,7 +243,9 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/api/generate-candy'
     | '/api/quiz-submit'
+    | '/api/translate'
     | '/chat/$threadId'
+    | '/chat/'
     | '/_authenticated/courses/$levelId'
   fileRoutesById: FileRoutesById
 }
@@ -239,6 +261,7 @@ export interface RootRouteChildren {
   ApiChatRoute: typeof ApiChatRoute
   ApiGenerateCandyRoute: typeof ApiGenerateCandyRoute
   ApiQuizSubmitRoute: typeof ApiQuizSubmitRoute
+  ApiTranslateRoute: typeof ApiTranslateRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -299,12 +322,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chat/': {
+      id: '/chat/'
+      path: '/'
+      fullPath: '/chat/'
+      preLoaderRoute: typeof ChatIndexRouteImport
+      parentRoute: typeof ChatRoute
+    }
     '/chat/$threadId': {
       id: '/chat/$threadId'
       path: '/$threadId'
       fullPath: '/chat/$threadId'
       preLoaderRoute: typeof ChatThreadIdRouteImport
       parentRoute: typeof ChatRoute
+    }
+    '/api/translate': {
+      id: '/api/translate'
+      path: '/api/translate'
+      fullPath: '/api/translate'
+      preLoaderRoute: typeof ApiTranslateRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/quiz-submit': {
       id: '/api/quiz-submit'
@@ -395,10 +432,12 @@ const AuthenticatedRouteRouteWithChildren =
 
 interface ChatRouteChildren {
   ChatThreadIdRoute: typeof ChatThreadIdRoute
+  ChatIndexRoute: typeof ChatIndexRoute
 }
 
 const ChatRouteChildren: ChatRouteChildren = {
   ChatThreadIdRoute: ChatThreadIdRoute,
+  ChatIndexRoute: ChatIndexRoute,
 }
 
 const ChatRouteWithChildren = ChatRoute._addFileChildren(ChatRouteChildren)
@@ -415,17 +454,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChatRoute: ApiChatRoute,
   ApiGenerateCandyRoute: ApiGenerateCandyRoute,
   ApiQuizSubmitRoute: ApiQuizSubmitRoute,
+  ApiTranslateRoute: ApiTranslateRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

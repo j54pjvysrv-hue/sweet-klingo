@@ -49,6 +49,33 @@ export function CandyReader({ passage }: { passage: Passage }) {
   const [grammar, setGrammar] = useState<GrammarMatch | null>(null);
   const [completed, setCompleted] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const [translations, setTranslations] = useState<Record<number, string>>({});
+  const [translating, setTranslating] = useState<Set<number>>(new Set());
+
+  async function fetchTranslation(li: number) {
+    if (translations[li] || translating.has(li)) return;
+    const ko = sentences[li].map((t) => t.text).join("").trim();
+    if (!ko) return;
+    setTranslating((s) => new Set(s).add(li));
+    try {
+      const res = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sentence: ko }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = (await res.json()) as { translation?: string };
+      if (data.translation) {
+        setTranslations((m) => ({ ...m, [li]: data.translation! }));
+      }
+    } catch (err) {
+      console.error("translate failed", err);
+      toast.error("Translation failed — try again.");
+    } finally {
+      setTranslating((s) => { const n = new Set(s); n.delete(li); return n; });
+    }
+  }
+
 
   const token = activeToken != null ? sentences[activeToken.line]?.[activeToken.idx] : undefined;
 
@@ -147,6 +174,15 @@ export function CandyReader({ passage }: { passage: Passage }) {
   function renderLine(li: number, line: Token[], inFocus = false) {
     const showTr = trMode === "always" || (trMode === "tap" && trShownIdx.has(li));
     const koreanOnly = line.map((t) => t.text).join("");
+    const translation = translations[li];
+    const isTranslating = translating.has(li);
+
+    // Auto-fetch translation when needed
+    if ((showTr || inFocus) && trMode !== "off" && !translation && !isTranslating) {
+      // Defer so we don't setState during render
+      queueMicrotask(() => fetchTranslation(li));
+    }
+
     return (
       <div className="space-y-2">
         <p className={cn("text-balance font-korean text-foreground", sizeClass, lhClass)}>
@@ -171,7 +207,9 @@ export function CandyReader({ passage }: { passage: Passage }) {
           )}
         </p>
         {(showTr || inFocus) && trMode !== "off" && (
-          <p className="text-sm italic text-muted-foreground">{sentenceGloss(line)}</p>
+          <p className="text-sm italic text-muted-foreground">
+            {translation ?? (isTranslating ? "Translating…" : sentenceGloss(line))}
+          </p>
         )}
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <button onClick={() => narrate(koreanOnly)} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 hover:border-primary hover:text-primary">
@@ -179,7 +217,10 @@ export function CandyReader({ passage }: { passage: Passage }) {
           </button>
           {trMode === "tap" && (
             <button
-              onClick={() => setTrShownIdx((s) => { const n = new Set(s); if (n.has(li)) n.delete(li); else n.add(li); return n; })}
+              onClick={() => {
+                setTrShownIdx((s) => { const n = new Set(s); if (n.has(li)) n.delete(li); else n.add(li); return n; });
+                fetchTranslation(li);
+              }}
               className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 hover:border-primary hover:text-primary"
             >
               {trShownIdx.has(li) ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
@@ -197,6 +238,7 @@ export function CandyReader({ passage }: { passage: Passage }) {
       </div>
     );
   }
+
 
   return (
     <div className="relative">
