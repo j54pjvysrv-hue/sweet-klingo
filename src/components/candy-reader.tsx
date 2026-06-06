@@ -49,6 +49,33 @@ export function CandyReader({ passage }: { passage: Passage }) {
   const [grammar, setGrammar] = useState<GrammarMatch | null>(null);
   const [completed, setCompleted] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const [translations, setTranslations] = useState<Record<number, string>>({});
+  const [translating, setTranslating] = useState<Set<number>>(new Set());
+
+  async function fetchTranslation(li: number) {
+    if (translations[li] || translating.has(li)) return;
+    const ko = sentences[li].map((t) => t.text).join("").trim();
+    if (!ko) return;
+    setTranslating((s) => new Set(s).add(li));
+    try {
+      const res = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sentence: ko }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = (await res.json()) as { translation?: string };
+      if (data.translation) {
+        setTranslations((m) => ({ ...m, [li]: data.translation! }));
+      }
+    } catch (err) {
+      console.error("translate failed", err);
+      toast.error("Translation failed — try again.");
+    } finally {
+      setTranslating((s) => { const n = new Set(s); n.delete(li); return n; });
+    }
+  }
+
 
   const token = activeToken != null ? sentences[activeToken.line]?.[activeToken.idx] : undefined;
 
