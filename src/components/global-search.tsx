@@ -106,7 +106,7 @@ export function GlobalSearch({ trigger }: { trigger?: React.ReactNode }) {
         </button>
       )}
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Search Candy, Hanja, vocab, lessons — Korean or English" value={q} onValueChange={setQ} />
+        <CommandInput placeholder="Search Candy, Hanja, grammar, vocab, lessons — Korean or English" value={q} onValueChange={setQ} />
         <CommandList>
           {loading && <div className="px-4 py-6 text-sm text-muted-foreground">Searching…</div>}
           {!loading && q && results.length === 0 && <CommandEmpty>No matches.</CommandEmpty>}
@@ -135,8 +135,23 @@ export function GlobalSearch({ trigger }: { trigger?: React.ReactNode }) {
               })}
             </CommandGroup>
           )}
+          {results.some((r) => r.kind === "grammar") && (
+            <CommandGroup heading="Grammar patterns">
+              {results.filter((r) => r.kind === "grammar").map((r) => {
+                const g = r as Extract<Result,{kind:"grammar"}>;
+                return (
+                  <CommandItem key={g.id} onSelect={() => go(g)}>
+                    <BookOpen className="mr-2 h-4 w-4 text-primary" />
+                    <span className="font-korean">{g.pattern}</span>
+                    <span className="ml-2 flex-1 text-muted-foreground">{g.meaning}</span>
+                    <span className="text-[11px] text-muted-foreground">{g.level}</span>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          )}
           {results.some((r) => r.kind === "vocab") && (
-            <CommandGroup heading="Saved vocabulary">
+            <CommandGroup heading="Vocabulary">
               {results.filter((r) => r.kind === "vocab").map((r) => {
                 const v = r as Extract<Result,{kind:"vocab"}>;
                 return (
@@ -144,6 +159,7 @@ export function GlobalSearch({ trigger }: { trigger?: React.ReactNode }) {
                     <Bookmark className="mr-2 h-4 w-4 text-primary" />
                     <span className="font-korean">{v.korean}</span>
                     <span className="ml-2 flex-1 text-muted-foreground">{v.meaning}</span>
+                    <span className="text-[11px] text-muted-foreground">{v.level}</span>
                   </CommandItem>
                 );
               })}
@@ -166,8 +182,8 @@ export function GlobalSearch({ trigger }: { trigger?: React.ReactNode }) {
             <CommandItem onSelect={() => { setOpen(false); navigate({ to: "/chat" }); }}>
               <MessagesSquare className="mr-2 h-4 w-4 text-primary" /> Open Soyeon chat
             </CommandItem>
-            <CommandItem onSelect={() => { setOpen(false); navigate({ to: "/hanja" }); }}>
-              <span className="mr-2 font-korean text-primary">漢</span> Hanja lookup
+            <CommandItem onSelect={() => { setOpen(false); navigate({ to: "/study", search: { tab: "hanja" } as never }); }}>
+              <span className="mr-2 font-korean text-primary">漢</span> Study — Hanja, Grammar & Vocab
             </CommandItem>
           </CommandGroup>
         </CommandList>
