@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Sparkles, Loader2 } from "lucide-react";
+import { Search, Sparkles, Loader2, BookOpen } from "lucide-react";
 import { CATEGORY_LABELS, LEVELS } from "@/lib/levels";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -105,17 +105,25 @@ function LibraryPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-12 sm:py-16">
-      <div className="max-w-2xl">
-        <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
-          <Sparkles className="h-3.5 w-3.5" /> Candy Library
-        </span>
-        <h1 className="mt-4 font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          Pick a Candy. Or invent one.
-        </h1>
-        <p className="mt-3 text-muted-foreground">
-          Curated reading passages across daily life, K-drama, student life, career, TOPIK and culture.
-          Each one is tappable, narrated, and connected to Soyeon.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="max-w-2xl">
+          <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+            <Sparkles className="h-3.5 w-3.5" /> Candy Library
+          </span>
+          <h1 className="mt-4 font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+            Pick a Candy. Or invent one.
+          </h1>
+          <p className="mt-3 text-muted-foreground">
+            Curated reading passages across daily life, K-drama, student life, career, TOPIK and culture.
+            Each one is tappable, narrated, and connected to Soyeon.
+          </p>
+        </div>
+        <Link
+          to="/courses"
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:border-primary hover:text-primary"
+        >
+          <BookOpen className="h-4 w-4" /> Browse structured courses
+        </Link>
       </div>
 
       {/* Generate */}
