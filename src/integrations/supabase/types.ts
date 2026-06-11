@@ -526,6 +526,48 @@ export type Database = {
           },
         ]
       }
+      vocabulary: {
+        Row: {
+          created_at: string
+          example_en: string | null
+          example_kr: string | null
+          id: string
+          korean: string
+          level: string
+          meaning: string
+          pos: string | null
+          romanization: string | null
+          tags: string[]
+          topic: string | null
+        }
+        Insert: {
+          created_at?: string
+          example_en?: string | null
+          example_kr?: string | null
+          id?: string
+          korean: string
+          level?: string
+          meaning: string
+          pos?: string | null
+          romanization?: string | null
+          tags?: string[]
+          topic?: string | null
+        }
+        Update: {
+          created_at?: string
+          example_en?: string | null
+          example_kr?: string | null
+          id?: string
+          korean?: string
+          level?: string
+          meaning?: string
+          pos?: string | null
+          romanization?: string | null
+          tags?: string[]
+          topic?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

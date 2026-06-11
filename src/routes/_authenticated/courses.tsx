@@ -59,6 +59,12 @@ function CoursesPage() {
         <Link to="/onboarding" className="hidden text-sm font-semibold text-primary hover:underline sm:block">
           Change level →
         </Link>
+        <Link
+          to="/library"
+          className="hidden rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:border-primary hover:text-primary sm:inline-flex"
+        >
+          Browse Candy library
+        </Link>
       </div>
 
       <div className="mt-10 space-y-6">
