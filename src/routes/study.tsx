@@ -148,7 +148,7 @@ function StudyPage() {
           return (
             <button
               key={t.id}
-              onClick={() => navigate({ search: { tab: t.id }, replace: true })}
+              onClick={() => navigate({ to: "/study", search: { tab: t.id } as never, replace: true })}
               className={
                 "inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition-colors " +
                 (active
