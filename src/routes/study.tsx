@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Search, BookOpen, Languages, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -58,7 +58,7 @@ const TABS = [
 
 function StudyPage() {
   const { tab } = Route.useSearch();
-  const navigate = Route.useNavigate();
+  const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [level, setLevel] = useState<"all" | "L1" | "L2" | "L3" | "L4" | "L5">("all");
   const [hanja, setHanja] = useState<Hanja[]>([]);
