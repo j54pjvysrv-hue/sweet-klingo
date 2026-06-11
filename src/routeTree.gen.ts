@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StudyRouteImport } from './routes/study'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ReadRouteImport } from './routes/read'
 import { Route as LibraryRouteImport } from './routes/library'
@@ -29,6 +30,11 @@ import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/h
 import { Route as AuthenticatedCoursesRouteImport } from './routes/_authenticated/courses'
 import { Route as AuthenticatedCoursesLevelIdRouteImport } from './routes/_authenticated/courses.$levelId'
 
+const StudyRoute = StudyRouteImport.update({
+  id: '/study',
+  path: '/study',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/library': typeof LibraryRoute
   '/read': typeof ReadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/study': typeof StudyRoute
   '/courses': typeof AuthenticatedCoursesRouteWithChildren
   '/home': typeof AuthenticatedHomeRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
@@ -152,6 +159,7 @@ export interface FileRoutesByTo {
   '/library': typeof LibraryRoute
   '/read': typeof ReadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/study': typeof StudyRoute
   '/courses': typeof AuthenticatedCoursesRouteWithChildren
   '/home': typeof AuthenticatedHomeRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
@@ -174,6 +182,7 @@ export interface FileRoutesById {
   '/library': typeof LibraryRoute
   '/read': typeof ReadRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/study': typeof StudyRoute
   '/_authenticated/courses': typeof AuthenticatedCoursesRouteWithChildren
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
@@ -196,6 +205,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/read'
     | '/sitemap.xml'
+    | '/study'
     | '/courses'
     | '/home'
     | '/onboarding'
@@ -215,6 +225,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/read'
     | '/sitemap.xml'
+    | '/study'
     | '/courses'
     | '/home'
     | '/onboarding'
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/read'
     | '/sitemap.xml'
+    | '/study'
     | '/_authenticated/courses'
     | '/_authenticated/home'
     | '/_authenticated/onboarding'
@@ -258,6 +270,7 @@ export interface RootRouteChildren {
   LibraryRoute: typeof LibraryRoute
   ReadRoute: typeof ReadRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  StudyRoute: typeof StudyRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiGenerateCandyRoute: typeof ApiGenerateCandyRoute
   ApiQuizSubmitRoute: typeof ApiQuizSubmitRoute
@@ -266,6 +279,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/study': {
+      id: '/study'
+      path: '/study'
+      fullPath: '/study'
+      preLoaderRoute: typeof StudyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -451,6 +471,7 @@ const rootRouteChildren: RootRouteChildren = {
   LibraryRoute: LibraryRoute,
   ReadRoute: ReadRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  StudyRoute: StudyRoute,
   ApiChatRoute: ApiChatRoute,
   ApiGenerateCandyRoute: ApiGenerateCandyRoute,
   ApiQuizSubmitRoute: ApiQuizSubmitRoute,
@@ -459,3 +480,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
