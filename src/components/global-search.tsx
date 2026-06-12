@@ -82,12 +82,13 @@ export function GlobalSearch({ trigger }: { trigger?: React.ReactNode }) {
   }, [q]);
 
   function go(r: Result) {
+    const term = q.trim();
     setOpen(false);
     setQ("");
     if (r.kind === "candy") navigate({ to: "/read", search: { passage: r.id } as never });
-    else if (r.kind === "hanja") navigate({ to: "/study", search: { tab: "hanja" } as never });
-    else if (r.kind === "grammar") navigate({ to: "/study", search: { tab: "grammar" } as never });
-    else if (r.kind === "vocab") navigate({ to: "/study", search: { tab: "vocab" } as never });
+    else if (r.kind === "hanja") navigate({ to: "/study", search: { tab: "hanja", q: term || undefined, focus: r.id } as never });
+    else if (r.kind === "grammar") navigate({ to: "/study", search: { tab: "grammar", q: term || undefined, focus: r.id } as never });
+    else if (r.kind === "vocab") navigate({ to: "/study", search: { tab: "vocab", q: term || undefined, focus: r.id } as never });
     else if (r.kind === "lesson") navigate({ to: "/read", search: { passage: r.passage_id ?? undefined } as never });
   }
 
