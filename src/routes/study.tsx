@@ -16,8 +16,6 @@ export const Route = createFileRoute("/study")({
   }),
   validateSearch: (s: Record<string, unknown>) => ({
     tab: (["hanja", "grammar", "vocab"].includes(String(s.tab)) ? (s.tab as "hanja" | "grammar" | "vocab") : "hanja"),
-    q: typeof s.q === "string" ? s.q : undefined,
-    focus: typeof s.focus === "string" ? s.focus : undefined,
   }),
   component: StudyPage,
 });
@@ -59,30 +57,14 @@ const TABS = [
 ];
 
 function StudyPage() {
-  const { tab, q: initialQ, focus } = Route.useSearch();
+  const { tab } = Route.useSearch();
   const navigate = useNavigate();
-  const [q, setQ] = useState(initialQ ?? "");
+  const [q, setQ] = useState("");
   const [level, setLevel] = useState<"all" | "L1" | "L2" | "L3" | "L4" | "L5">("all");
   const [hanja, setHanja] = useState<Hanja[]>([]);
   const [grammar, setGrammar] = useState<Grammar[]>([]);
   const [vocab, setVocab] = useState<Vocab[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // When deep-linked from global search, sync the local search field
-  useEffect(() => { if (initialQ !== undefined) setQ(initialQ); }, [initialQ]);
-
-  // After data loads, scroll to & flash the focused entry
-  useEffect(() => {
-    if (!focus || loading) return;
-    const el = document.getElementById(`study-${focus}`);
-    if (!el) return;
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
-    el.classList.add("ring-2", "ring-primary", "ring-offset-2", "ring-offset-background");
-    const t = setTimeout(() => {
-      el.classList.remove("ring-2", "ring-primary", "ring-offset-2", "ring-offset-background");
-    }, 2200);
-    return () => clearTimeout(t);
-  }, [focus, loading, tab]);
 
   useEffect(() => {
     (async () => {
@@ -239,7 +221,7 @@ function HanjaGrid({ rows }: { rows: Hanja[] }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {rows.map((h) => (
-        <article key={h.id} id={`study-${h.id}`} className="rounded-3xl border border-border bg-card p-5 shadow-petal transition-shadow">
+        <article key={h.id} className="rounded-3xl border border-border bg-card p-5 shadow-petal">
           <div className="flex items-start justify-between gap-3">
             <div className="font-korean text-5xl text-primary">{h.character}</div>
             <div className="text-right">
@@ -270,7 +252,7 @@ function GrammarList({ rows }: { rows: Grammar[] }) {
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {rows.map((g) => (
-        <article key={g.id} id={`study-${g.id}`} className="rounded-2xl border border-border bg-card p-5 shadow-petal transition-shadow">
+        <article key={g.id} className="rounded-2xl border border-border bg-card p-5 shadow-petal">
           <div className="flex items-center gap-2">
             <span className="font-korean text-lg font-semibold text-primary">{g.pattern}</span>
             <span className="ml-auto rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
@@ -309,7 +291,7 @@ function VocabGrid({ rows }: { rows: Vocab[] }) {
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {rows.map((v) => (
-        <article key={v.id} id={`study-${v.id}`} className="rounded-2xl border border-border bg-card p-4 shadow-petal transition-shadow">
+        <article key={v.id} className="rounded-2xl border border-border bg-card p-4 shadow-petal">
           <div className="flex items-baseline justify-between gap-2">
             <span className="font-korean text-xl font-semibold text-foreground">{v.korean}</span>
             <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
