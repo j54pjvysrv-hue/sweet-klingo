@@ -52,6 +52,7 @@ export type Database = {
           emoji: string | null
           english_hint: string | null
           generated_by: string | null
+          generated_by_user_id: string | null
           id: string
           level: Database["public"]["Enums"]["learning_level"]
           reading_minutes: number | null
@@ -66,6 +67,7 @@ export type Database = {
           emoji?: string | null
           english_hint?: string | null
           generated_by?: string | null
+          generated_by_user_id?: string | null
           id?: string
           level: Database["public"]["Enums"]["learning_level"]
           reading_minutes?: number | null
@@ -80,6 +82,7 @@ export type Database = {
           emoji?: string | null
           english_hint?: string | null
           generated_by?: string | null
+          generated_by_user_id?: string | null
           id?: string
           level?: Database["public"]["Enums"]["learning_level"]
           reading_minutes?: number | null

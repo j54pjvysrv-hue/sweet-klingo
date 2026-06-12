@@ -66,6 +66,17 @@ export const Route = createFileRoute("/api/chat")({
               if (!userId || !threadId) return;
               try {
                 const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+                // Verify the thread belongs to this user before writing (prevents cross-user injection)
+                const { data: thread } = await supabaseAdmin
+                  .from("chat_threads")
+                  .select("id")
+                  .eq("id", threadId)
+                  .eq("user_id", userId)
+                  .maybeSingle();
+                if (!thread) {
+                  console.warn("chat: thread ownership check failed", { threadId, userId });
+                  return;
+                }
                 // Persist any messages not already saved by examining the last user msg + new assistant msg
                 const newOnes = finalMessages.slice(-2); // user + assistant most-recent pair
                 for (const m of newOnes) {

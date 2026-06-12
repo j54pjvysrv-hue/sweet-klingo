@@ -8,6 +8,18 @@ export const Route = createFileRoute("/api/translate")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        // Require authentication to prevent anonymous abuse of LOVABLE_API_KEY
+        const authHeader = request.headers.get("authorization") ?? request.headers.get("Authorization") ?? "";
+        if (!authHeader.toLowerCase().startsWith("bearer ")) {
+          return new Response("Unauthorized", { status: 401 });
+        }
+        const bearer = authHeader.slice(7);
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser(bearer);
+        if (userErr || !userData?.user) {
+          return new Response("Unauthorized", { status: 401 });
+        }
+
         const { sentence } = (await request.json()) as Body;
         const ko = (sentence || "").trim();
         if (!ko) return new Response("sentence required", { status: 400 });

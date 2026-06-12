@@ -148,6 +148,7 @@ export const Route = createFileRoute("/api/generate-candy")({
               reading_minutes: Math.max(2, Math.round(passage.lines.length * 0.6)),
               body: { lines: passage.lines },
               generated_by: "ai",
+              generated_by_user_id: userData.user.id,
             })
             .select("id")
             .single();
