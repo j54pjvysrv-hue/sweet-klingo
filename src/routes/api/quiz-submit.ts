@@ -23,6 +23,12 @@ export const Route = createFileRoute("/api/quiz-submit")({
             ? (body.suggested_level as string)
             : "L1";
 
+          // Cap answers payload size (defence-in-depth against oversized JSON blobs)
+          const answersRaw = JSON.stringify(body.answers ?? {});
+          if (answersRaw.length > 4096) {
+            return json({ error: "Answers payload too large." }, 400);
+          }
+
           const { error } = await supabaseAdmin.from("quiz_results").insert({
             user_id: u.user.id,
             score,

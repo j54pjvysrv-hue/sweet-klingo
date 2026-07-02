@@ -36,18 +36,21 @@ export const Route = createFileRoute("/api/chat")({
         const key = process.env.LOVABLE_API_KEY;
         if (!key) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
 
-        // Resolve user from bearer
+        // Require authenticated user
         const authHeader = request.headers.get("authorization") || request.headers.get("Authorization");
-        let userId: string | null = null;
-        if (authHeader?.startsWith("Bearer ")) {
-          try {
-            const token = authHeader.slice(7);
-            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-            const { data } = await supabaseAdmin.auth.getUser(token);
-            userId = data?.user?.id ?? null;
-          } catch (e) {
-            console.warn("auth resolve failed", e);
-          }
+        if (!authHeader?.startsWith("Bearer ")) {
+          return new Response("Unauthorized", { status: 401 });
+        }
+        let userId: string;
+        try {
+          const token = authHeader.slice(7);
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { data, error } = await supabaseAdmin.auth.getUser(token);
+          if (error || !data?.user) return new Response("Unauthorized", { status: 401 });
+          userId = data.user.id;
+        } catch (e) {
+          console.warn("auth resolve failed", e);
+          return new Response("Unauthorized", { status: 401 });
         }
 
         try {
