@@ -58,9 +58,15 @@ export function CandyReader({ passage }: { passage: Passage }) {
     if (!ko) return;
     setTranslating((s) => new Set(s).add(li));
     try {
+      const { data: sess } = await supabase.auth.getSession();
+      const token = sess.session?.access_token;
+      if (!token) throw new Error("Not signed in");
       const res = await fetch("/api/translate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ sentence: ko }),
       });
       if (!res.ok) throw new Error(await res.text());
