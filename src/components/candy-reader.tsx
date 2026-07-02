@@ -57,10 +57,24 @@ export function CandyReader({ passage }: { passage: Passage }) {
     const ko = sentences[li].map((t) => t.text).join("").trim();
     if (!ko) return;
     setTranslating((s) => new Set(s).add(li));
+    const t0 = performance.now();
     try {
-      const { data: sess } = await supabase.auth.getSession();
-      const token = sess.session?.access_token;
-      if (!token) throw new Error("Not signed in");
+      let { data: sess } = await supabase.auth.getSession();
+      let token = sess.session?.access_token;
+      if (!token) {
+        console.warn("[translate] no session token — attempting refresh");
+        const { data: refreshed, error: refreshErr } = await supabase.auth.refreshSession();
+        if (refreshErr) console.warn("[translate] refresh failed", refreshErr);
+        token = refreshed.session?.access_token;
+      }
+      if (!token) {
+        toast.error("You're signed out. Please sign in again to translate.", {
+          action: { label: "Sign in", onClick: () => { window.location.href = "/auth"; } },
+        });
+        return;
+      }
+
+      console.log("[translate] requesting", { line: li, len: ko.length });
       const res = await fetch("/api/translate", {
         method: "POST",
         headers: {
@@ -69,14 +83,77 @@ export function CandyReader({ passage }: { passage: Passage }) {
         },
         body: JSON.stringify({ sentence: ko }),
       });
-      if (!res.ok) throw new Error(await res.text());
-      const data = (await res.json()) as { translation?: string };
+
+      const raw = await res.text();
+      let parsed: { translation?: string; error?: { code?: string; message?: string; supabaseError?: string; upstream?: string; detail?: string } } = {};
+      try { parsed = raw ? JSON.parse(raw) : {}; } catch { /* non-JSON */ }
+
+      if (!res.ok) {
+        console.error("[translate] server error", {
+          status: res.status,
+          statusText: res.statusText,
+          code: parsed.error?.code,
+          message: parsed.error?.message,
+          supabaseError: parsed.error?.supabaseError,
+          upstream: parsed.error?.upstream,
+          detail: parsed.error?.detail,
+          raw: parsed.error ? undefined : raw.slice(0, 300),
+          ms: Math.round(performance.now() - t0),
+        });
+
+        const code = parsed.error?.code;
+        const message = parsed.error?.message;
+
+        if (res.status === 401 || code === "missing_token" || code === "invalid_token") {
+          // Try one silent refresh + retry
+          const { data: refreshed } = await supabase.auth.refreshSession();
+          if (refreshed.session?.access_token) {
+            const retry = await fetch("/api/translate", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${refreshed.session.access_token}`,
+              },
+              body: JSON.stringify({ sentence: ko }),
+            });
+            if (retry.ok) {
+              const data = (await retry.json()) as { translation?: string };
+              if (data.translation) {
+                setTranslations((m) => ({ ...m, [li]: data.translation! }));
+                return;
+              }
+            }
+          }
+          toast.error(message || "Your session expired. Please sign in again.", {
+            action: { label: "Sign in", onClick: () => { window.location.href = "/auth"; } },
+          });
+          return;
+        }
+
+        if (res.status === 429) {
+          toast.error(message || "Too many requests. Please wait a moment.");
+          return;
+        }
+
+        toast.error(message || `Translation failed (${res.status}). Please try again.`);
+        return;
+      }
+
+      const data = parsed as { translation?: string };
       if (data.translation) {
         setTranslations((m) => ({ ...m, [li]: data.translation! }));
+        console.log("[translate] ok", { line: li, ms: Math.round(performance.now() - t0) });
+      } else {
+        toast.error("Translator returned no text. Please try again.");
       }
     } catch (err) {
-      console.error("translate failed", err);
-      toast.error("Translation failed — try again.");
+      const e = err as Error;
+      console.error("[translate] network/client error", {
+        name: e?.name,
+        message: e?.message,
+        ms: Math.round(performance.now() - t0),
+      });
+      toast.error("Couldn't reach the translation service. Check your connection and try again.");
     } finally {
       setTranslating((s) => { const n = new Set(s); n.delete(li); return n; });
     }
